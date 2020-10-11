@@ -126,7 +126,7 @@ class GridMask(object):
         grid = self.mask()
         mask = self.__class__.random_crop(grid, image.shape)
         mask = tf.cast(mask, image.dtype)
-        mask = tf.expand_dims(mask, -1) if tf.shape(image)[-1] == 3 else mask
+        mask = tf.expand_dims(mask, -1) if image._rank() != mask._rank() else mask
         image *= mask
         return image, label
 
