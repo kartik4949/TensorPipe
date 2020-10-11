@@ -1,5 +1,4 @@
 from pipe import Funnel
-from bunch import Bunch
 
 """
 Create a Funnel for the Pipeline!
@@ -15,7 +14,6 @@ config = {
     },
     "categorical_encoding": "labelencoder",
 }
-config = Bunch(config)
 pipeline = Funnel(data_path="testdata", config=config, datatype="categorical")
 pipeline = pipeline.dataset(type="train")
 

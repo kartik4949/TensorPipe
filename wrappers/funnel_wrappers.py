@@ -19,6 +19,7 @@ from __future__ import division
 from __future__ import print_function
 
 import os
+from bunch import Bunch
 
 import tensorflow as tf
 import numpy as np
@@ -52,6 +53,9 @@ class TensorFunnel(Funnel):
             config: Config File for setting the required configuration of datapipeline.
             training:Traning mode on or not?
         """
+
+        # bunch the config dict.
+        config = Bunch(config)
         super(TensorFunnel, Funnel).__init__(
             data_path, config, datatype="bbox", training=training
         )
@@ -135,6 +139,8 @@ class CategoricalTensorFunnel(Funnel):
             training: is pipeline in training mode or not?
         """
 
+        # bunch the config dict.
+        config = Bunch(config)
         if not isinstance(data_path, str):
             msg = f"datapath should be str but pass {type(data_path)}."
             logging.error(msg)
