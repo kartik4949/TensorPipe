@@ -30,11 +30,13 @@ ALLOWED_TYPES = ["categorical", "binary", "bbox"]
 
 """Funnel Abstract Class provides essential helper functions across"""
 
+
 class Funnel(ABC):
     """Funnel.
             Abstract Funnel Class which acts as intterface for three supported
             Class of dataset, and provides helper functions.
     """
+
     AUTOTUNE = tf.data.experimental.AUTOTUNE
 
     @property
@@ -81,7 +83,8 @@ class Funnel(ABC):
                 Base classes.
         """
         raise NotImplementedError(
-            "Method parser is not implemented in class " + self.__class__.__name__
+            "Method parser is not implemented in class "
+            + self.__class__.__name__
         )
 
     @abstractmethod
@@ -91,7 +94,8 @@ class Funnel(ABC):
                 output in required format i.e fixed data size in bbox,segmentation.
         """
         raise NotImplementedError(
-            "Method encoder is not implemented in class " + self.__class__.__name__
+            "Method encoder is not implemented in class "
+            + self.__class__.__name__
         )
 
     def _fetch_records(filename):
@@ -134,5 +138,6 @@ class Funnel(ABC):
                 provides high performing, low latency data iterable.
         """
         raise NotImplementedError(
-            "Method dataset is not implemented in class " + self.__class__.__name__
+            "Method dataset is not implemented in class "
+            + self.__class__.__name__
         )

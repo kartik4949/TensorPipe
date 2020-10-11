@@ -34,7 +34,12 @@ class GridMask(object):
     """
 
     def __init__(
-        self, image_shape, ratio=0.6, rotate=10, gridmask_size_ratio=0.5, fill=1
+        self,
+        image_shape,
+        ratio=0.6,
+        rotate=10,
+        gridmask_size_ratio=0.5,
+        fill=1,
     ):
         """__init__.
 
@@ -64,7 +69,8 @@ class GridMask(object):
         hh, ww = mask.shape
         h, w = image_shape[:2]
         mask = mask[
-            (hh - h) // 2 : (hh - h) // 2 + h, (ww - w) // 2 : (ww - w) // 2 + w
+            (hh - h) // 2 : (hh - h) // 2 + h,
+            (ww - w) // 2 : (ww - w) // 2 + w,
         ]
         return mask
 
@@ -72,7 +78,9 @@ class GridMask(object):
     def mask(self):
         """mask helper function for initializing grid mask of required size.
         """
-        mask_w = mask_h = int((self.gridmask_size_ratio + 1) * max(self.h, self.w))
+        mask_w = mask_h = int(
+            (self.gridmask_size_ratio + 1) * max(self.h, self.w)
+        )
         mask = tf.zeros(shape=[mask_h, mask_w], dtype=tf.int32)
         gridblock = tf.random.uniform(
             shape=[],
@@ -89,7 +97,8 @@ class GridMask(object):
             length = tf.cast(
                 tf.math.minimum(
                     tf.math.maximum(
-                        int(tf.cast(gridblock, tf.float32) * self.ratio + 0.5), 1
+                        int(tf.cast(gridblock, tf.float32) * self.ratio + 0.5),
+                        1,
                     ),
                     gridblock - 1,
                 ),
@@ -105,7 +114,8 @@ class GridMask(object):
                 end = tf.math.minimum(start + length, mask_w)
                 indices = tf.reshape(tf.range(start, end), [end - start, 1])
                 updates = (
-                    tf.ones(shape=[end - start, mask_w], dtype=tf.int32) * self.fill
+                    tf.ones(shape=[end - start, mask_w], dtype=tf.int32)
+                    * self.fill
                 )
                 mask = tf.tensor_scatter_nd_update(mask, indices, updates)
             mask = tf.transpose(mask)
@@ -123,18 +133,21 @@ class GridMask(object):
 
 """Mosaic augmentation."""
 
+
 class Mosaic:
-  """Mosaic Augmentation class.
+    """Mosaic Augmentation class.
   1. Mosaic sub images will not be preserving aspect ratio of original images.
   2. Tested on static graphs and eager  execution.
   3. This Implementation of mosaic augmentation is tested in tf2.x.
   """
 
-  def __init__(self,
-               out_size =(680, 680),
-               n_images: int = 4,
-               _minimum_mosaic_image_dim: int = 25):
-    """__init__.
+    def __init__(
+        self,
+        out_size=(680, 680),
+        n_images: int = 4,
+        _minimum_mosaic_image_dim: int = 25,
+    ):
+        """__init__.
     Args:
       out_size: output mosaic image size.
       n_images: number images to make mosaic
@@ -143,50 +156,55 @@ class Mosaic:
         _minimum_mosaic_image_dim is 25 , minimum mosaic sub images
         dimension will be 25 % of 680.
     """
-    # TODO(someone) #MED #use n_images to build mosaic.
-    self._n_images = n_images
-    self._out_size = out_size
-    self._minimum_mosaic_image_dim = _minimum_mosaic_image_dim
-    assert (_minimum_mosaic_image_dim >
-            0), "Minimum Mosaic image dimension should be above 0"
+        # TODO(someone) #MED #use n_images to build mosaic.
+        self._n_images = n_images
+        self._out_size = out_size
+        self._minimum_mosaic_image_dim = _minimum_mosaic_image_dim
+        assert (
+            _minimum_mosaic_image_dim > 0
+        ), "Minimum Mosaic image dimension should be above 0"
 
-  @property
-  def n_images(self) -> int:
-    return self._n_images
+    @property
+    def n_images(self) -> int:
+        return self._n_images
 
-  @property
-  def out_size(self) -> int:
-    return self._out_size
+    @property
+    def out_size(self) -> int:
+        return self._out_size
 
-  def _mosaic_divide_points(self) -> (int, int):
-    """Returns a  tuple of x and y which corresponds to mosaic divide points."""
-    x_point = tf.random.uniform(
-        shape=[1],
-        minval=tf.cast(
-            self.out_size[0] * (self._minimum_mosaic_image_dim / 100),
-            tf.int32),
-        maxval=tf.cast(
-            self.out_size[0] * ((100 - self._minimum_mosaic_image_dim) / 100),
-            tf.int32,
-        ),
-        dtype=tf.int32,
-    )
-    y_point = tf.random.uniform(
-        shape=[1],
-        minval=tf.cast(
-            self.out_size[1] * (self._minimum_mosaic_image_dim / 100),
-            tf.int32),
-        maxval=tf.cast(
-            self.out_size[1] * ((100 - self._minimum_mosaic_image_dim) / 100),
-            tf.int32,
-        ),
-        dtype=tf.int32,
-    )
-    return x_point, y_point
+    def _mosaic_divide_points(self) -> (int, int):
+        """Returns a  tuple of x and y which corresponds to mosaic divide points."""
+        x_point = tf.random.uniform(
+            shape=[1],
+            minval=tf.cast(
+                self.out_size[0] * (self._minimum_mosaic_image_dim / 100),
+                tf.int32,
+            ),
+            maxval=tf.cast(
+                self.out_size[0]
+                * ((100 - self._minimum_mosaic_image_dim) / 100),
+                tf.int32,
+            ),
+            dtype=tf.int32,
+        )
+        y_point = tf.random.uniform(
+            shape=[1],
+            minval=tf.cast(
+                self.out_size[1] * (self._minimum_mosaic_image_dim / 100),
+                tf.int32,
+            ),
+            maxval=tf.cast(
+                self.out_size[1]
+                * ((100 - self._minimum_mosaic_image_dim) / 100),
+                tf.int32,
+            ),
+            dtype=tf.int32,
+        )
+        return x_point, y_point
 
-  @staticmethod
-  def _scale_box(box, image, mosaic_image):
-    """scale boxes with mosaic sub image.
+    @staticmethod
+    def _scale_box(box, image, mosaic_image):
+        """scale boxes with mosaic sub image.
     Args:
       box: mosaic image box.
       image: original image.
@@ -194,39 +212,42 @@ class Mosaic:
     Returns:
       Scaled bounding boxes.
     """
-    return [
-        box[0] * tf.shape(mosaic_image)[1] / tf.shape(image)[1],
-        box[1] * tf.shape(mosaic_image)[0] / tf.shape(image)[0],
-        box[2] * tf.shape(mosaic_image)[1] / tf.shape(image)[1],
-        box[-1] * tf.shape(mosaic_image)[0] / tf.shape(image)[0],
-    ]
+        return [
+            box[0] * tf.shape(mosaic_image)[1] / tf.shape(image)[1],
+            box[1] * tf.shape(mosaic_image)[0] / tf.shape(image)[0],
+            box[2] * tf.shape(mosaic_image)[1] / tf.shape(image)[1],
+            box[-1] * tf.shape(mosaic_image)[0] / tf.shape(image)[0],
+        ]
 
-  def _scale_images(self, images, mosaic_divide_points):
-    """Scale Sub Images.
+    def _scale_images(self, images, mosaic_divide_points):
+        """Scale Sub Images.
     Args:
       images: original single images to make mosaic.
       mosaic_divide_points: Points to build mosaic around on given output.
     Returns:
       A tuple of scaled Mosaic sub images.
     """
-    x, y = mosaic_divide_points[0][0], mosaic_divide_points[1][0]
-    mosaic_image_topleft = tf.image.resize(images[0], (x, y))
-    mosaic_image_topright = tf.image.resize(images[1],
-                                            (self.out_size[0] - x, y))
-    mosaic_image_bottomleft = tf.image.resize(images[2],
-                                              (x, self.out_size[1] - y))
-    mosaic_image_bottomright = tf.image.resize(
-        images[3], (self.out_size[0] - x, self.out_size[1] - y))
-    return (
-        mosaic_image_topleft,
-        mosaic_image_topright,
-        mosaic_image_bottomleft,
-        mosaic_image_bottomright,
-    )
+        x, y = mosaic_divide_points[0][0], mosaic_divide_points[1][0]
+        mosaic_image_topleft = tf.image.resize(images[0], (x, y))
+        mosaic_image_topright = tf.image.resize(
+            images[1], (self.out_size[0] - x, y)
+        )
+        mosaic_image_bottomleft = tf.image.resize(
+            images[2], (x, self.out_size[1] - y)
+        )
+        mosaic_image_bottomright = tf.image.resize(
+            images[3], (self.out_size[0] - x, self.out_size[1] - y)
+        )
+        return (
+            mosaic_image_topleft,
+            mosaic_image_topright,
+            mosaic_image_bottomleft,
+            mosaic_image_bottomright,
+        )
 
-  @tf.function
-  def _mosaic(self, images, boxes, mosaic_divide_points):
-    """Builds mosaic of provided images.
+    @tf.function
+    def _mosaic(self, images, boxes, mosaic_divide_points):
+        """Builds mosaic of provided images.
     Args:
       images: original single images to make mosaic.
       boxes: corresponding bounding boxes to images.
@@ -234,115 +255,127 @@ class Mosaic:
     Returns:
       A tuple of mosaic Image, Mosaic Boxes merged.
     """
-    (
-        mosaic_image_topleft,
-        mosaic_image_topright,
-        mosaic_image_bottomleft,
-        mosaic_image_bottomright,
-    ) = self._scale_images(images, mosaic_divide_points)
+        (
+            mosaic_image_topleft,
+            mosaic_image_topright,
+            mosaic_image_bottomleft,
+            mosaic_image_bottomright,
+        ) = self._scale_images(images, mosaic_divide_points)
 
-    #####################################################
-    # Scale Boxes for TOP LEFT image.
-    # Note: Below function is complex because of TF item assignment restriction.
-    # Map_fn is replace with vectorized_map below for optimization purpose.
-    mosaic_box_topleft = tf.transpose(
-        tf.vectorized_map(
+        #####################################################
+        # Scale Boxes for TOP LEFT image.
+        # Note: Below function is complex because of TF item assignment restriction.
+        # Map_fn is replace with vectorized_map below for optimization purpose.
+        mosaic_box_topleft = tf.transpose(
+            tf.vectorized_map(
+                functools.partial(
+                    self._scale_box,
+                    image=images[0],
+                    mosaic_image=mosaic_image_topleft,
+                ),
+                boxes[0],
+            )
+        )
+
+        # Scale and Pad Boxes for TOP RIGHT image.
+
+        mosaic_box_topright = tf.vectorized_map(
             functools.partial(
                 self._scale_box,
-                image=images[0],
-                mosaic_image=mosaic_image_topleft),
-            boxes[0],
-        ))
+                image=images[1],
+                mosaic_image=mosaic_image_topright,
+            ),
+            boxes[1],
+        )
+        num_boxes = boxes[1].shape[0]
+        idx_tp = tf.constant([[1], [3]])
+        update_tp = [
+            [tf.shape(mosaic_image_topleft)[0]] * num_boxes,
+            [tf.shape(mosaic_image_topleft)[0]] * num_boxes,
+        ]
+        mosaic_box_topright = tf.transpose(
+            tf.tensor_scatter_nd_add(mosaic_box_topright, idx_tp, update_tp)
+        )
 
-    # Scale and Pad Boxes for TOP RIGHT image.
+        # Scale and Pad Boxes for BOTTOM LEFT image.
 
-    mosaic_box_topright = tf.vectorized_map(
-        functools.partial(
-            self._scale_box,
-            image=images[1],
-            mosaic_image=mosaic_image_topright),
-        boxes[1],
-    )
-    num_boxes = boxes[1].shape[0]
-    idx_tp = tf.constant([[1], [3]])
-    update_tp = [
-        [tf.shape(mosaic_image_topleft)[0]] * num_boxes,
-        [tf.shape(mosaic_image_topleft)[0]] * num_boxes,
-    ]
-    mosaic_box_topright = tf.transpose(
-        tf.tensor_scatter_nd_add(mosaic_box_topright, idx_tp, update_tp))
+        mosaic_box_bottomleft = tf.vectorized_map(
+            functools.partial(
+                self._scale_box,
+                image=images[2],
+                mosaic_image=mosaic_image_bottomleft,
+            ),
+            boxes[2],
+        )
 
-    # Scale and Pad Boxes for BOTTOM LEFT image.
+        num_boxes = boxes[2].shape[0]
+        idx_bl = tf.constant([[0], [2]])
+        update_bl = [
+            [tf.shape(mosaic_image_topleft)[1]] * num_boxes,
+            [tf.shape(mosaic_image_topleft)[1]] * num_boxes,
+        ]
+        mosaic_box_bottomleft = tf.transpose(
+            tf.tensor_scatter_nd_add(mosaic_box_bottomleft, idx_bl, update_bl)
+        )
 
-    mosaic_box_bottomleft = tf.vectorized_map(
-        functools.partial(
-            self._scale_box,
-            image=images[2],
-            mosaic_image=mosaic_image_bottomleft),
-        boxes[2],
-    )
+        # Scale and Pad Boxes for BOTTOM RIGHT image.
+        mosaic_box_bottomright = tf.vectorized_map(
+            functools.partial(
+                self._scale_box,
+                image=images[3],
+                mosaic_image=mosaic_image_bottomright,
+            ),
+            boxes[3],
+        )
 
-    num_boxes = boxes[2].shape[0]
-    idx_bl = tf.constant([[0], [2]])
-    update_bl = [
-        [tf.shape(mosaic_image_topleft)[1]] * num_boxes,
-        [tf.shape(mosaic_image_topleft)[1]] * num_boxes,
-    ]
-    mosaic_box_bottomleft = tf.transpose(
-        tf.tensor_scatter_nd_add(mosaic_box_bottomleft, idx_bl, update_bl))
+        num_boxes = boxes[3].shape[0]
+        idx_br = tf.constant([[0], [2], [1], [3]])
+        update_br = [
+            [tf.shape(mosaic_image_topright)[1]] * num_boxes,
+            [tf.shape(mosaic_image_topright)[1]] * num_boxes,
+            [tf.shape(mosaic_image_bottomleft)[0]] * num_boxes,
+            [tf.shape(mosaic_image_bottomleft)[0]] * num_boxes,
+        ]
+        mosaic_box_bottomright = tf.transpose(
+            tf.tensor_scatter_nd_add(mosaic_box_bottomright, idx_br, update_br)
+        )
 
-    # Scale and Pad Boxes for BOTTOM RIGHT image.
-    mosaic_box_bottomright = tf.vectorized_map(
-        functools.partial(
-            self._scale_box,
-            image=images[3],
-            mosaic_image=mosaic_image_bottomright),
-        boxes[3],
-    )
+        # Gather mosaic_sub_images and boxes.
+        mosaic_images = [
+            mosaic_image_topleft,
+            mosaic_image_topright,
+            mosaic_image_bottomleft,
+            mosaic_image_bottomright,
+        ]
+        mosaic_boxes = [
+            mosaic_box_topleft,
+            mosaic_box_topright,
+            mosaic_box_bottomleft,
+            mosaic_box_bottomright,
+        ]
 
-    num_boxes = boxes[3].shape[0]
-    idx_br = tf.constant([[0], [2], [1], [3]])
-    update_br = [
-        [tf.shape(mosaic_image_topright)[1]] * num_boxes,
-        [tf.shape(mosaic_image_topright)[1]] * num_boxes,
-        [tf.shape(mosaic_image_bottomleft)[0]] * num_boxes,
-        [tf.shape(mosaic_image_bottomleft)[0]] * num_boxes,
-    ]
-    mosaic_box_bottomright = tf.transpose(
-        tf.tensor_scatter_nd_add(mosaic_box_bottomright, idx_br, update_br))
+        return mosaic_images, mosaic_boxes
 
-    # Gather mosaic_sub_images and boxes.
-    mosaic_images = [
-        mosaic_image_topleft,
-        mosaic_image_topright,
-        mosaic_image_bottomleft,
-        mosaic_image_bottomright,
-    ]
-    mosaic_boxes = [
-        mosaic_box_topleft,
-        mosaic_box_topright,
-        mosaic_box_bottomleft,
-        mosaic_box_bottomright,
-    ]
+    def __call__(self, images, boxes):
+        """Builds mosaic with given images, boxes."""
+        if images.shape[0] != 4:
+            err_msg = "Currently Exact 4 Images are supported by Mosaic Aug."
+            logging.error(err_msg)
+            raise Exception(err_msg)
 
-    return mosaic_images, mosaic_boxes
+        x, y = self._mosaic_divide_points()
+        mosaic_sub_images, mosaic_boxes = self._mosaic(
+            images, boxes, mosaic_divide_points=(x, y)
+        )
 
-  def __call__(self, images, boxes):
-    """Builds mosaic with given images, boxes."""
-    if images.shape[0] != 4:
-      err_msg = "Currently Exact 4 Images are supported by Mosaic Aug."
-      logging.error(err_msg)
-      raise Exception(err_msg)
+        upper_stack = tf.concat(
+            [mosaic_sub_images[0], mosaic_sub_images[1]], axis=0
+        )
+        lower_stack = tf.concat(
+            [mosaic_sub_images[2], mosaic_sub_images[3]], axis=0
+        )
+        mosaic_image = tf.concat([upper_stack, lower_stack], axis=1)
+        return mosaic_image, mosaic_boxes
 
-    x, y = self._mosaic_divide_points()
-    mosaic_sub_images, mosaic_boxes = self._mosaic(
-        images, boxes, mosaic_divide_points=(x, y))
 
-    upper_stack = tf.concat([mosaic_sub_images[0], mosaic_sub_images[1]],
-                            axis=0)
-    lower_stack = tf.concat([mosaic_sub_images[2], mosaic_sub_images[3]],
-                            axis=0)
-    mosaic_image = tf.concat([upper_stack, lower_stack], axis=1)
-    return mosaic_image, mosaic_boxes
-
-augmentation = {'gridmask':GridMask }
+augmentation = {"gridmask": GridMask}

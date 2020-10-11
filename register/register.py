@@ -19,7 +19,6 @@ from __future__ import division
 from __future__ import print_function
 
 
-
 from utils.registry import Registry
-FUNNEL = Registry("Funnels")
 
+FUNNEL = Registry("Funnels")
