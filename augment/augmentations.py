@@ -29,7 +29,8 @@ from register.register import AUG
 
 """Grid Masking Augmentation Reference: https://arxiv.org/abs/2001.04086"""
 
-@AUG.register_module(name= "gridmask")
+
+@AUG.register_module(name="gridmask")
 class GridMask(object):
     """GridMask.
             Class which provides grid masking augmentation
@@ -139,7 +140,7 @@ class GridMask(object):
 """Mosaic augmentation."""
 
 
-@AUG.register_module(name= "mosaic")
+@AUG.register_module(name="mosaic")
 class Mosaic:
     """Mosaic Augmentation class.
   1. Mosaic sub images will not be preserving aspect ratio of original images.
@@ -386,32 +387,32 @@ class Mosaic:
 
 @AUG.register_module(name="cutout")
 def cut_out(
-        image,
-        label,
-        p=0.5,
-        s_l=0.02,
-        s_h=0.4,
-        r_1=0.3,
-        r_2=1 / 0.3,
-        v_l=0,
-        v_h=255,
-    ):
-        img_h, img_w, img_c = image.shape
-        p_1 = np.random.rand()
+    image,
+    label,
+    p=0.5,
+    s_l=0.02,
+    s_h=0.4,
+    r_1=0.3,
+    r_2=1 / 0.3,
+    v_l=0,
+    v_h=255,
+):
+    img_h, img_w, img_c = image.shape
+    p_1 = np.random.rand()
 
-        if p_1 > p:
-            return image, label
-
-        while True:
-            s = np.random.uniform(s_l, s_h) * img_h * img_w
-            r = np.random.uniform(r_1, r_2)
-            w = int(np.sqrt(s / r))
-            h = int(np.sqrt(s * r))
-            left = np.random.randint(0, img_w)
-            top = np.random.randint(0, img_h)
-
-            if left + w <= img_w and top + h <= img_h:
-                break
-        c = np.random.uniform(v_l, v_h, (h, w, img_c))
-        image[top : top + h, left : left + w, :] = c
+    if p_1 > p:
         return image, label
+
+    while True:
+        s = np.random.uniform(s_l, s_h) * img_h * img_w
+        r = np.random.uniform(r_1, r_2)
+        w = int(np.sqrt(s / r))
+        h = int(np.sqrt(s * r))
+        left = np.random.randint(0, img_w)
+        top = np.random.randint(0, img_h)
+
+        if left + w <= img_w and top + h <= img_h:
+            break
+    c = np.random.uniform(v_l, v_h, (h, w, img_c))
+    image[top : top + h, left : left + w, :] = c
+    return image, label
