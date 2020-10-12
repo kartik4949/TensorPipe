@@ -1,4 +1,9 @@
 # TensorPipe
+[![Library][tensorflow-shield]][tensorflow-url]
+[![MIT License][license-shield]][license-url]
+[![LinkedIn][linkedin-shield]][linkedin-url]
+
+
 ![alt text](logo.png)
 
 
@@ -48,3 +53,25 @@ for data in pipeline:
     print(data[0].shape, data[1].shape)                                     
 
 ```
+
+## Release History
+* v1.0
+    * Bbox, Keypoints, Custom Py Functions Support.(WIP)
+* v1.0-beta
+    * Classification Support with gridmask and mosaic augmentations.
+
+## Meta
+
+Kartik Sharma – [@linkedIn](https://www.linkedin.com/in/kartik-sharma-aaa021169/) – kartik4949@gmail.com
+
+Distributed under the Apache 2.0 license. See ``LICENSE`` for more information.
+
+
+<!-- MARKDOWN LINKS & IMAGES -->
+<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
+[tensorflow-shield]: https://img.shields.io/badge/Tensorflow-2.x-orange
+[tensorflow-url]: https://tensorflow.org
+[license-shield]: https://img.shields.io/badge/OpenSource-%E2%9D%A4%EF%B8%8F-blue
+[license-url]: LICENSE.txt
+[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=flat-square&logo=linkedin&colorB=555
+[linkedin-url]: https://www.linkedin.com/in/kartik-sharma-aaa021169/
