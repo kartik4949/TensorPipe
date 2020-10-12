@@ -25,6 +25,7 @@ import tensorflow as tf
 import tensorflow_addons as tfa
 
 from augment import augmentations
+from register.register import AUG
 
 ALLOWED_TRANSFORMATIONS = [
     "flip_left_right",
@@ -33,6 +34,7 @@ ALLOWED_TRANSFORMATIONS = [
     "random_rotate",
     "random_shear_y",
     "cutout",
+    "mosaic",
     "random_shear_x",
 ]
 
@@ -203,7 +205,7 @@ class Augmentation:
             gridmask_size_ratio: grid to image_size ratio.
             fill: fill value default 1.
         """
-        return augmentations.augmentation.get("gridmask")(
+        return AUG.get("gridmask")(
             self.image_size,
             ratio=ratio,
             rotate=rotate,

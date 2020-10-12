@@ -21,4 +21,8 @@ from __future__ import print_function
 
 from utils.registry import Registry
 
+# register for funnels
 FUNNEL = Registry("Funnels")
+
+# register for transformations
+AUG = Registry("transformations")
