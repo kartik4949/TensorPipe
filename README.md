@@ -10,10 +10,11 @@
 High Performance Tensorflow Data Pipeline with State of Art Augmentations and low level optimizations.
 
 ## Requirements
-Python 3.8
-Tensorflow 2.2
-Tensorflow addons
-Sklearn
+
+* Python 3.8
+* Tensorflow 2.2
+* Tensorflow addons
+* Sklearn
 
 Install using:
 
