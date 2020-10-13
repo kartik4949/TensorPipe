@@ -24,7 +24,6 @@ from bunch import Bunch
 import tensorflow as tf
 import numpy as np
 import logging
-import gin.tf
 
 from .base_funnel import Funnel
 from augment import augment
