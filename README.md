@@ -23,8 +23,9 @@ High Performance Tensorflow Data Pipeline with State of Art Augmentations and lo
 - [x] Flexible and easy configuration
 - [x] Gin-config support
 
+## Advance Users Section: 
 ## Example Usage 1
-
+### Create a Data Pipeline for Training.
 ```
 from pipe import Funnel                                                         
 from bunch import Bunch                                                         
@@ -48,10 +49,83 @@ config = Bunch(config)
 pipeline = Funnel(data_path="testdata", config=config, datatype="categorical")  
 pipeline = pipeline.dataset(type="train")                                       
                                                                                 
-# Pipline ready to use, iter over it to use.                                                      
-for data in pipeline:                                                           
-    print(data[0].shape, data[1].shape)                                     
+# Pipline ready to use, iter over it to use.
+# Custom loop example.
+for data in pipeline:
+    image_batch , label_batch = data[0], data[1]
+    # you can use _loss = loss(label_batch,model.predict(image_batch))
+    # calculate gradients on loss and optimize the model.
+    print(image_batch,label_batch)                                      
 
+```
+
+## Example Usage 2
+### Create a Data Pipeline for Validation.
+
+```
+from pipe import Funnel                                                         
+from bunch import Bunch                                                         
+"""                                                                             
+Create a Funnel for the Pipeline!                                               
+"""                                                                             
+
+
+# Config for Funnel
+config = {                                                                      
+    "batch_size": 1,                                                            
+    "image_size": [512,512],                                                    
+    "transformations": {                                                                                                       
+    },                                                                          
+    "categorical_encoding":"labelencoder"                                       
+}                                                                               
+config = Bunch(config)                                                          
+pipeline = Funnel(data_path="testdata", config=config, datatype="categorical", training=False)  
+pipeline = pipeline.dataset(type="val")                                       
+
+# use pipeline to validate your data on model.
+loss = []
+for data in pipeline:
+    image_batch , actual_label_batch = data[0], data[1]
+    # pred_label_batch = model.predict(image_batch)
+    # loss.append(calc_loss(actual_label_batch,pred_label_batch))
+    print(image_batch,label_batch)                                     
+
+```
+## Beginners Section.
+## Keras Compatiblity.
+### Very simple example to use pipeline with keras model.fit as iterable.
+```
+import tensorflow as tf
+from pipe import Funnel
+
+"""
+Create a Funnel for the Pipeline!
+"""
+
+config = {
+    "batch_size": 2,
+    "image_size": [100, 100],
+    "transformations": {
+        "flip_left_right": None,
+        "gridmask": None,
+        "random_rotate": None,
+    },
+    "categorical_encoding": "labelencoder",
+}
+pipeline = Funnel(data_path="testdata", config=config, datatype="categorical")
+pipeline = pipeline.dataset(type="train")
+
+# Create Keras model
+model = tf.keras.applications.VGG16(
+    include_top=True, weights=None,input_shape=(100,100,3),
+    pooling=None, classes=2, classifier_activation='sigmoid'
+)
+
+# compile
+model.compile(loss='mse', optimizer='adam')
+
+# pass pipeline as iterable
+model.fit(pipeline , batch_size=2,steps_per_epoch=5,verbose=1)
 ```
 
 ## Config.
