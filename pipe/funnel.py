@@ -32,7 +32,7 @@ class Funnel(object):
             configuration.
     """
 
-    def __init__(self, data_path, config, datatype="bbox"):
+    def __init__(self, data_path, config, datatype="bbox", training=True):
         # pylint: disable=line-too-long
 
         """__init__.
@@ -68,7 +68,7 @@ class Funnel(object):
                              segmentation."
             )
         _funnel_class = FUNNEL.get(datatype)
-        self._funnel = _funnel_class(data_path, config, datatype)
+        self._funnel = _funnel_class(data_path, config, datatype=datatype,training=training)
 
     def dataset(self, type: str = "Train") -> tf.data:
         """dataset.

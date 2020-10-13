@@ -125,7 +125,7 @@ class CategoricalTensorFunnel(Funnel):
     """
     # pylint: enable=line-too-long
 
-    def __init__(self, data_path, config=None, datatype="categorical"):
+    def __init__(self, data_path, config=None, datatype="categorical", training=True):
         """__init__.
 
         Args:
@@ -149,7 +149,7 @@ class CategoricalTensorFunnel(Funnel):
         self._datatype = datatype
         self._data_path = data_path
         self.config = config
-        self._training = True
+        self._training = training
         self._shuffle_buffer = None
         self._batch_size = self.config.get("batch_size", 32)
         self._image_size = self.config.get("image_size", [512, 512])
@@ -286,7 +286,8 @@ class CategoricalTensorFunnel(Funnel):
         """
         dataset = self.parser(type)
         dataset = dataset.prefetch(self._batch_size)
-        dataset = dataset.map(lambda *args: self.augmenter(*args))
+        if self._training:
+            dataset = dataset.map(lambda *args: self.augmenter(*args))
         dataset = dataset.batch(
             self._batch_size, drop_remainder=self._drop_remainder
         )
