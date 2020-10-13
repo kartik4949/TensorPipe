@@ -9,6 +9,22 @@
 
 High Performance Tensorflow Data Pipeline with State of Art Augmentations and low level optimizations.
 
+## Requirements
+Python 3.8
+Tensorflow 2.2
+Tensorflow addons
+Sklearn
+
+Install using:
+
+```
+pip install tensorflow-addons==0.11.2
+pip install tensorflow==2.2.0
+pip install sklearn
+
+```
+
+
 ## Features
 
 - [x] High Performance tf.data pipline
