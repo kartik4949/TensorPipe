@@ -23,7 +23,7 @@ High Performance Tensorflow Data Pipeline with State of Art Augmentations and lo
 - [x] Flexible and easy configuration
 - [x] Gin-config support
 
-## Example Usage
+## Example Usage 1
 
 ```
 from pipe import Funnel                                                         
@@ -33,7 +33,7 @@ Create a Funnel for the Pipeline!
 """                                                                             
 
 
-#All configuration will be avaible soon!!
+# Config for Funnel
 config = {                                                                      
     "batch_size": 2,                                                            
     "image_size": [512,512],                                                    
@@ -48,11 +48,50 @@ config = Bunch(config)
 pipeline = Funnel(data_path="testdata", config=config, datatype="categorical")  
 pipeline = pipeline.dataset(type="train")                                       
                                                                                 
-#Pipline ready to use, iter over it to use.                                                      
+# Pipline ready to use, iter over it to use.                                                      
 for data in pipeline:                                                           
     print(data[0].shape, data[1].shape)                                     
 
 ```
+
+## Config.
+* **image_size** - Output Image Size for the pipeline.
+* **batch_size** - Batch size for the pipeline.
+* **transformations** - Dictionary of transformations to apply with respective keyword arguments.
+* **categorical_encoding** - Encoding for categorical data - ('labelencoder' , 'onehotencoder').
+
+## Augmentations:
+
+### GridMask
+Creates a gridmask on input image with rotation defined on range.
+* **params**:
+    * **ratio** - grid to space ratio
+    * **fill** - fill value
+    * **rotate** - rotation range in degrees
+
+### MixUp
+Mixes two randomly sampled images and their respective labels with given alpha.
+* **params**:
+    * **alpha** - value for blend function.
+
+### RandomErase
+Randomly erases rectangular chunk with is sampled randomly on given image.
+* **params**:
+    * **prob** - probablity to randomerase on image.
+
+### CutMix
+Overlaps a resized randomly sample image on given image with complete overlay on subset portion of image.
+* **params**:
+    * **prob** - probablity to CutMix on image.
+
+### Mosaic
+Creates a gridmask on input image with rotation defined on range.
+* **params**:
+    * **ratio** - grid to space ratio
+    * **fill** - fill value
+    * **rotate** - rotation range in degrees
+
+
 
 ## Release History
 * v1.0
