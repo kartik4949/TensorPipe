@@ -44,6 +44,10 @@ class Funnel(ABC):
         return ALLOWED_TYPES
 
     @property
+    def classes(self):
+        return self._classes
+
+    @property
     def tf_path_pattern(self):
         return self._tensorrecords_path + "*.tfrecord"
 

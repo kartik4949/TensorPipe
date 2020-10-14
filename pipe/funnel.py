@@ -23,19 +23,56 @@ import tensorflow as tf
 import wrappers
 from register.register import FUNNEL
 
+
+"""Singleton Design pattern"""
+
+
+class _singleton(type):
+
+    _max_allowed_instances = 1
+    _instances = {}
+
+    def __call__(cls, *args, **kwargs):
+        """__call__.
+
+        Args:
+            cls: Child class
+            args: child class args
+            kwargs: child class kwargs
+        """
+        if len(cls._instances) == cls._max_allowed_instances:
+            raise Exception(
+                f"{cls.__name__} is allowed to have at most {cls._max_allowed_instances} instances"
+            )
+
+        if cls not in cls._instances:
+            cls._instances[cls] = super(_singleton, cls).__call__(
+                *args, **kwargs
+            )
+        return cls._instances[cls]
+
+
+def singleton_pattern(cls):
+    """singleton_pattern.
+            Helper singleton_pattern decorater.
+    """
+    return _singleton(cls.__name__, cls.__bases__, dict(cls.__dict__))
+
+
 """Funnel Interface class"""
 
 
+@singleton_pattern
 class Funnel(object):
     """Funnel.
             Funnel Class which gets the required Funnel given in
             configuration.
     """
 
-    def __init__(self, data_path, config, datatype="bbox", training=True):
+    def __new__(cls, data_path, config, datatype="bbox", training=True):
         # pylint: disable=line-too-long
 
-        """__init__.
+        """__new__.
 
         Args:
             data_path: Data path in structured format,please see readme file
@@ -49,16 +86,11 @@ class Funnel(object):
                                   Classification problems.
             Example:
                     **********************************************************
-                    from TensorPipe.pipe import Funnel
-
-                    funnel = Funnel('testdata',config=config,datatype='categorical')
-
+                    >> from TensorPipe.pipe import Funnel
+                    >> funnel = Funnel('testdata',config=config,datatype='categorical')
                     # high performance with parallelism tf.data iterable.
-                    dataset = funnel.dataset(type = 'train')
+                    >> dataset = funnel.dataset(type = 'train')
 
-                    for data in dataset:
-                        # feed the data to NN or visualize.
-                        print(data[0])
         """
         # pylint: enable=line-too-long
         if datatype not in wrappers.ALLOWED_TYPES:
@@ -68,20 +100,6 @@ class Funnel(object):
                              segmentation."
             )
         _funnel_class = FUNNEL.get(datatype)
-        self._funnel = _funnel_class(data_path, config, datatype=datatype,training=training)
-
-    def dataset(self, type: str = "Train") -> tf.data:
-        """dataset.
-                Dataset function which provides high performance tf.data
-                iterable, which gives tuple comprising (x - image, y - labels)
-                Iterate over the provided iterable to for feeding into custom
-                training loop for pass it to keras model.fit.
-
-        Args:
-            type: Subset data for the current dataset i.e train,val,test.
-        """
-        if type.lower() not in ["train", "val", "test", "validation"]:
-            raise Exception("Subset Data you asked is not a valid portion")
-        # high performance tf.data iterable
-        iterable = self._funnel.dataset(type)
-        return iterable
+        return _funnel_class(
+            data_path, config, datatype=datatype, training=training
+        )

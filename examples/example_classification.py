@@ -14,8 +14,8 @@ config = {
     },
     "categorical_encoding": "labelencoder",
 }
-pipeline = Funnel(data_path="testdata", config=config, datatype="categorical")
-pipeline = pipeline.dataset(type="train")
+funnel = Funnel(data_path="testdata", config=config, datatype="categorical")
+dataset = funnel.dataset(type="train")
 
-for data in pipeline:
+for data in dataset:
     print(data[0].shape)

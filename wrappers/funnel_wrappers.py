@@ -124,7 +124,9 @@ class CategoricalTensorFunnel(Funnel):
     """
     # pylint: enable=line-too-long
 
-    def __init__(self, data_path, config=None, datatype="categorical", training=True):
+    def __init__(
+        self, data_path, config=None, datatype="categorical", training=True
+    ):
         """__init__.
 
         Args:
@@ -242,6 +244,7 @@ class CategoricalTensorFunnel(Funnel):
                 )
                 _labels.append(label_folder)
 
+        self._classes = set(_labels)
         _labels = np.reshape(np.asarray(_labels), (-1, 1))
         _labels = self.categorical_encoding(_labels)
         _labels = np.reshape(np.asarray(_labels), (-1, 1))
@@ -280,9 +283,17 @@ class CategoricalTensorFunnel(Funnel):
 
     def dataset(self, type="train"):
         """dataset.
-                Returns a iterable tf.data dataset ,which is configured
-                with the config file passed with require augmentations.
+                Dataset function which provides high performance tf.data
+                iterable, which gives tuple comprising (x - image, y - labels)
+                Iterate over the provided iterable to for feeding into custom
+                training loop for pass it to keras model.fit.
+
+        Args:
+            type: Subset data for the current dataset i.e train,val,test.
         """
+        if type.lower() not in ["train", "val", "test", "validation"]:
+            raise Exception("Subset Data you asked is not a valid portion")
+
         dataset = self.parser(type)
         dataset = dataset.prefetch(self._batch_size)
         if self._training:
