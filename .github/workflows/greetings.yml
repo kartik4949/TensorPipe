@@ -10,4 +10,4 @@ jobs:
       with:
         repo-token: ${{ secrets.GITHUB_TOKEN }}
         issue-message: 'Hi Welcome to TensorPipe, We will get back to you as soon possible!!'' first issue'
-        pr-message: 'Seems like this is your first contribution to this Repository, Welcome to the community!, '' first pr'
+        pr-message: 'Seems like this is your first contribution to this Repository, Welcome to the community!'
