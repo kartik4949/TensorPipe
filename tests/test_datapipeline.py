@@ -1,8 +1,10 @@
-"""Data Pipeline simple test."""
-from absl import logging
+"""Data Pipeline simple tests."""
+
 from bunch import Bunch
+from absl import logging
 import tensorflow as tf
 
+from pipe import Funnel
 from augment import augment
 
 
@@ -47,6 +49,35 @@ class AugmentTest(tf.test.TestCase):
         )
         image, bbox = self.augmentor(images, bboxes)
         self.assertEqual(image.shape[1], images.shape[1])
+
+class ConfigTest(tf.test.TestCase):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        config = {
+            "batch_size": 1,
+            "image_size": [512, 512],
+            "transformations": {
+                "flip_left_right": None,
+                "gridmask": None,
+                "random_rotate": None,
+            },
+            "categorical_encoding": "labelencoder",
+        }
+        config = Bunch(config)
+        self.config = config
+        tf.compat.v1.random.set_random_seed(111111)
+
+    def test_config_getter(self):
+        """Verify config."""
+        funnel = Funnel(data_path="testdata", config=self.config, datatype="categorical")
+        _ = funnel.dataset(type="train")
+        self.assertEqual(self.config.batch_size, 1)
+
+    def test_config_setter(self):
+        """Simple test for config assignment"""
+        self.config.batch_size = 2
+        self.assertEqual(self.config.batch_size, 2)
 
 
 if __name__ == "__main__":

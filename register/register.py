@@ -25,4 +25,4 @@ from utils.registry import Registry
 FUNNEL = Registry("Funnels")
 
 # register for transformations
-AUG = Registry("transformations")
+AUG = Registry("Transformations")
