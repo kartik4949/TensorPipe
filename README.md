@@ -176,12 +176,22 @@ Overlaps a resized randomly sample image on given image with complete overlay on
     * **prob** - probablity to CutMix on image.
 
 ### Mosaic
-Creates a gridmask on input image with rotation defined on range.
+Creates a mosaic of input 4 images into one single image.
 * **params**:
-    * **ratio** - grid to space ratio
-    * **fill** - fill value
-    * **rotate** - rotation range in degrees
+    * **prob** - Probablity to mosaic.
 
+## CutMix , CutOut, MixUp
+
+![alt text](https://www.researchgate.net/publication/340296142/figure/fig1/AS:874996595429376@1585626853032/Comparison-of-our-proposed-Attentive-CutMix-with-Mixup-5-Cutout-1-and-CutMix-3.png)
+#### source (https://www.researchgate.net/publication/340296142/figure/fig1/AS:874996595429376@1585626853032/Comparison-of-our-proposed-Attentive-CutMix-with-Mixup-5-Cutout-1-and-CutMix-3.png)
+
+## Mosaic
+![alt-text](https://hoya012.github.io/assets/img/yolov4/8.PNG)
+#### source (https://hoya012.github.io/assets/img/yolov4/8.PNG)
+
+## Grid Mask
+![alt-text](https://storage.googleapis.com/groundai-web-prod/media/users/user_302546/project_404544/images/x1.png)
+#### source (https://storage.googleapis.com/groundai-web-prod/media/users/user_302546/project_404544/images/x1.png)
 
 
 ## Release History
