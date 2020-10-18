@@ -125,7 +125,9 @@ class CategoricalTensorFunnel(Funnel):
     """
     # pylint: enable=line-too-long
 
-    def __init__(self, data_path, config=None, datatype="categorical", training=True):
+    def __init__(
+        self, data_path, config=None, datatype="categorical", training=True
+    ):
         """__init__.
 
         Args:
@@ -187,6 +189,18 @@ class CategoricalTensorFunnel(Funnel):
     def get_id_to_imagefile(self):
         return self._get_id_to_imagefile
 
+    @property
+    def classes(self):
+        return self._classes
+
+    @property
+    def data_path(self):
+        return self._data_path
+
+    @property
+    def datatype(self):
+        return self._datatype
+
     def resize(self, image):
         return tf.image.resize(
             image,
@@ -233,7 +247,13 @@ class CategoricalTensorFunnel(Funnel):
                 self.data_path + "/" + subset + "/" + label_folder
             ):
                 _images.append(
-                    self.data_path + "/" + subset + "/" + label_folder + "/" + images
+                    self.data_path
+                    + "/"
+                    + subset
+                    + "/"
+                    + label_folder
+                    + "/"
+                    + images
                 )
                 _labels.append(label_folder)
 
@@ -242,13 +262,17 @@ class CategoricalTensorFunnel(Funnel):
         _labels = self.categorical_encoding(_labels)
         _labels = np.reshape(np.asarray(_labels), (-1, 1))
         self._size = len(_images)
-        assert len(_images) == len(_labels), "Length of Images and Labels didnt match"
+        assert len(_images) == len(
+            _labels
+        ), "Length of Images and Labels didnt match"
         return _images, _labels
 
     def parser(self, subset):
         """parser for reading images and bbox from tensor records.
         """
-        dataset = tf.data.Dataset.from_tensor_slices(self._get_file_labels(subset))
+        dataset = tf.data.Dataset.from_tensor_slices(
+            self._get_file_labels(subset)
+        )
 
         if self._training:
             dataset = dataset.shuffle(self._size)
@@ -287,6 +311,8 @@ class CategoricalTensorFunnel(Funnel):
         dataset = dataset.prefetch(self._batch_size)
         if self._training:
             dataset = dataset.map(lambda *args: self.augmenter(*args))
-        dataset = dataset.batch(self._batch_size, drop_remainder=self._drop_remainder)
+        dataset = dataset.batch(
+            self._batch_size, drop_remainder=self._drop_remainder
+        )
         dataset = self.pretraining(dataset)
         return dataset
