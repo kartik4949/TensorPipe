@@ -20,7 +20,7 @@ from __future__ import division
 from __future__ import print_function
 
 
-from abc import ABC, abstractmethod
+from abc import ABC, abstractmethod, abstractproperty
 
 import tensorflow as tf
 import logging
@@ -43,19 +43,20 @@ class Funnel(ABC):
     def allowed_dataset_types(self):
         return ALLOWED_TYPES
 
-    @property
+    @abstractproperty
     def classes(self):
-        return self._classes
+        pass
+        # rself._classes
 
     @property
     def tf_path_pattern(self):
         return self._tensorrecords_path + "*.tfrecord"
 
-    @property
+    @abstractproperty
     def data_path(self):
         return self._data_path
 
-    @property
+    @abstractproperty
     def datatype(self):
         return self._datatype
 

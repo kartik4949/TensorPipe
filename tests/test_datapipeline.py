@@ -50,6 +50,7 @@ class AugmentTest(tf.test.TestCase):
         image, bbox = self.augmentor(images, bboxes)
         self.assertEqual(image.shape[1], images.shape[1])
 
+
 class ConfigTest(tf.test.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -70,7 +71,9 @@ class ConfigTest(tf.test.TestCase):
 
     def test_config_getter(self):
         """Verify config."""
-        funnel = Funnel(data_path="testdata", config=self.config, datatype="categorical")
+        funnel = Funnel(
+            data_path="testdata", config=self.config, datatype="categorical"
+        )
         _ = funnel.dataset(type="train")
         self.assertEqual(self.config.batch_size, 1)
 
