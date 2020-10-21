@@ -18,6 +18,8 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import typeguard
+
 import tensorflow as tf
 
 import wrappers
@@ -69,7 +71,14 @@ class Funnel(object):
             configuration.
     """
 
-    def __new__(cls, data_path, config, datatype="bbox", training=True):
+    @typeguard.typechecked
+    def __new__(
+        cls,
+        data_path: str,
+        config: dict,
+        datatype: str = "bbox",
+        training: bool = True,
+    ):
         # pylint: disable=line-too-long
 
         """__new__.

@@ -20,6 +20,8 @@ from __future__ import print_function
 
 import functools
 import inspect
+import typeguard
+from typing import List
 
 import tensorflow as tf
 import tensorflow_addons as tfa
@@ -53,7 +55,23 @@ def radians(degree: int) -> float:
 
 
 class Augmentation:
-    def __init__(self, config, transformations, type="bbox"):
+    """Augmentation.
+    Class Augmentation which consists inhouse augmentations and builds
+    the transformations pipeline with given transformations in config.
+    ::
+
+    Example:
+
+        augment = Augmentation(config,["random_rotate","gridmask"])
+        # Use the pipeline and iterate over function in the pipeline.
+        pipeline = augment._pipeline
+
+    """
+
+    @typeguard.typechecked
+    def __init__(
+        self, config: dict, transformations: dict, type: str = "bbox"
+    ):
         """__init__.
                 Augmentation class provides and builds the augmentations pipe-
                 line required for tf.data iterable.
@@ -220,6 +238,7 @@ class Augment(Augmentation):
             in sequential manner.
     """
 
+    @typeguard.typechecked
     def __init__(self, config: dict, datatype: str = "bbox"):
         """__init__.
 
@@ -232,6 +251,7 @@ class Augment(Augmentation):
         super().__init__(config, self.transformations, type=datatype)
         self.dataset_type = datatype
 
+    @typeguard.typechecked
     def __call__(
         self, image: tf.Tensor, label: tf.Tensor
     ) -> (tf.Tensor, tf.Tensor):

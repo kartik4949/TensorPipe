@@ -20,6 +20,8 @@ from __future__ import print_function
 
 import os
 from bunch import Bunch
+import typeguard
+from typing import Optional
 
 import tensorflow as tf
 import numpy as np
@@ -125,8 +127,13 @@ class CategoricalTensorFunnel(Funnel):
     """
     # pylint: enable=line-too-long
 
+    @typeguard.typechecked
     def __init__(
-        self, data_path, config=None, datatype="categorical", training=True
+        self,
+        data_path: str,
+        config: Optional[dict] = None,
+        datatype="categorical",
+        training=True,
     ):
         """__init__.
 
@@ -267,7 +274,8 @@ class CategoricalTensorFunnel(Funnel):
         ), "Length of Images and Labels didnt match"
         return _images, _labels
 
-    def parser(self, subset):
+    @typeguard.typechecked
+    def parser(self, subset: str) -> tf.data:
         """parser for reading images and bbox from tensor records.
         """
         dataset = tf.data.Dataset.from_tensor_slices(
@@ -294,7 +302,8 @@ class CategoricalTensorFunnel(Funnel):
     def encoder(self, dataset):
         return dataset
 
-    def dataset(self, type="train"):
+    @typeguard.typechecked
+    def dataset(self, type: str = "train") -> tf.data:
         """dataset.
                 Dataset function which provides high performance tf.data
                 iterable, which gives tuple comprising (x - image, y - labels)
