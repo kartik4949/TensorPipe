@@ -69,9 +69,7 @@ class Augmentation:
     """
 
     @typeguard.typechecked
-    def __init__(
-        self, config: dict, transformations: dict, type: str = "bbox"
-    ):
+    def __init__(self, config: dict, transformations: dict, type: str = "bbox"):
         """__init__.
                 Augmentation class provides and builds the augmentations pipe-
                 line required for tf.data iterable.
@@ -89,7 +87,6 @@ class Augmentation:
         self._pipeline = []
         self._set_tfa_attrb()
         self.image_size = config.image_size
-
         # builds the augment pipeline.
 
         for transform, kwargs in transformations.items():
@@ -173,11 +170,7 @@ class Augmentation:
 
         occur = tf.random.uniform([], -0.15, 0.15) < prob
         shearx = tf.random.uniform([], range[0], range[1])
-        image = (
-            tfa.image.shear_x(image, level=shearx, replace=0)
-            if occur
-            else image
-        )
+        image = tfa.image.shear_x(image, level=shearx, replace=0) if occur else image
         return image, label
 
     @tf.function
@@ -204,13 +197,7 @@ class Augmentation:
         return image, label
 
     def gridmask(
-        self,
-        image,
-        label,
-        ratio=0.6,
-        rotate=10,
-        gridmask_size_ratio=0.5,
-        fill=1,
+        self, image, label, ratio=0.6, rotate=10, gridmask_size_ratio=0.5, fill=1
     ):
         """gridmask.
                 GridMask initializer function which intializes GridMask class.
@@ -252,9 +239,7 @@ class Augment(Augmentation):
         self.dataset_type = datatype
 
     @typeguard.typechecked
-    def __call__(
-        self, image: tf.Tensor, label: tf.Tensor
-    ) -> (tf.Tensor, tf.Tensor):
+    def __call__(self, image: tf.Tensor, label: tf.Tensor) -> (tf.Tensor, tf.Tensor):
         """__call__.
                 Callable which is invoked in tfdata pipeline and performs the
                 actual transformation on images and labels.
