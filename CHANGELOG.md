@@ -1,12 +1,11 @@
 # Change Log
 
-## TODO (kartik4949)
-* Added custom function injection.
 
-## Unreleased
+## v1.0
 
 ### Added
 
+* Custom numpy function injection.
 * Type check validation.
 * Examples.
 * Config and some augmentation tests.
@@ -17,6 +16,7 @@
 * Change log
 * Software Architecture
 * Internal Changes
+* Format changes.
 
 ## v1.0-beta.1
 
