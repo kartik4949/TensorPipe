@@ -20,6 +20,7 @@ from __future__ import print_function
 
 import os
 from bunch import Bunch
+import inspect
 import typeguard
 from typing import Optional
 
@@ -164,6 +165,15 @@ class CategoricalTensorFunnel(Funnel):
         self._image_size = self.config.get("image_size", [512, 512])
         self._drop_remainder = self.config.get("drop_remainder", True)
         self.augmenter = augment.Augment(self.config, datatype)
+        self.numpy_function = self.config.get("numpy_function", None)
+
+        if self.numpy_function:
+            assert callable(
+                self.numpy_function
+            ), "numpy_function should be a callable."
+            assert len(
+                inspect.getfullargspec(self.numpy_function).args
+            ), "py_function should be having two arguments."
 
     def categorical_encoding(self, labels):
         """categorical_encoding.
@@ -318,8 +328,24 @@ class CategoricalTensorFunnel(Funnel):
 
         dataset = self.parser(type)
         dataset = dataset.prefetch(self._batch_size)
+
+        # custom numpy function to inject in datapipeline.
+        def _numpy_function(img, lbl):
+            _output = tf.numpy_function(
+                func=self.numpy_function,
+                inp=[img, lbl],
+                Tout=(tf.float32, tf.int64),
+            )
+            return _output[0], _output[1]
+
         if self._training:
-            dataset = dataset.map(lambda *args: self.augmenter(*args))
+            dataset = dataset.map(
+                self.augmenter, num_parallel_calls=self.AUTOTUNE
+            )
+            if self.numpy_function:
+                dataset = dataset.map(
+                    _numpy_function, num_parallel_calls=self.AUTOTUNE
+                )
         dataset = dataset.batch(
             self._batch_size, drop_remainder=self._drop_remainder
         )

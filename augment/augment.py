@@ -89,7 +89,6 @@ class Augmentation:
         self._pipeline = []
         self._set_tfa_attrb()
         self.image_size = config.image_size
-
         # builds the augment pipeline.
 
         for transform, kwargs in transformations.items():
