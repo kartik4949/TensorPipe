@@ -19,6 +19,7 @@
 
 from bunch import Bunch
 from absl import logging
+
 import tensorflow as tf
 
 from pipe import Funnel

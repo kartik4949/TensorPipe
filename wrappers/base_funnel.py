@@ -45,8 +45,7 @@ class Funnel(ABC):
 
     @abstractproperty
     def classes(self):
-        pass
-        # rself._classes
+        raise NotImplementedError
 
     @property
     def tf_path_pattern(self):

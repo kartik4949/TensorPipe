@@ -32,15 +32,16 @@ from .base_funnel import Funnel
 from augment import augment
 from register.register import FUNNEL
 
-__all__ = ["TensorFunnel", "CategoricalTensorFunnel"]
+__all__ = ["BboxFunnel", "CategoricalTensorFunnel"]
 
-"""Tensor Funnel for Bbox"""
+"""Bbox Funnel for bounding box dataset."""
+
 
 # WIP
-@FUNNEL.register_module(name="tfrecord")
-class TensorFunnel(Funnel):
-    """TensorFunnel.
-            TensorFunnel Class for Bbox dataset,This class will provide
+@FUNNEL.register_module(name="bbox")
+class BboxFunnel(Funnel):
+    """BboxFunnel.
+            BboxFunnel Class for Bbox dataset,This class will provide
             data iterable with images,bboxs or images,targets with required
             augmentations.
     """
@@ -59,7 +60,7 @@ class TensorFunnel(Funnel):
         raise NotImplementedError
         # bunch the config dict.
         config = Bunch(config)
-        super(TensorFunnel, Funnel).__init__(
+        super(BboxFunnel, Funnel).__init__(
             data_path, config, datatype="bbox", training=training
         )
         if not isinstance(data_path, str):
