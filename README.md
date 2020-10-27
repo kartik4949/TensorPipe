@@ -39,7 +39,7 @@ pip install sklearn
 - [x] CutOut in core tf2.x
 - [x] Flexible and easy configuration
 - [x] Gin-config support
-
+- [x] Custom numpy function injection.
 ## Advance Users Section: 
 ## Example Usage 1
 ### Create a Data Pipeline for Training.
