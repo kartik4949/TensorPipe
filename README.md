@@ -22,9 +22,7 @@ Install using:
 pip install tensorflow-addons==0.11.2
 pip install tensorflow==2.2.0
 pip install sklearn
-
 ```
-
 
 ## Features
 
