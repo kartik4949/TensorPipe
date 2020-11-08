@@ -64,7 +64,7 @@ config = {
 }                                                                               
 config = Bunch(config)                                                          
 pipeline = Funnel(data_path="testdata", config=config, datatype="categorical")  
-pipeline = pipeline.dataset(type="train")                                       
+pipeline = pipeline.from_dataset(type="train")                                       
                                                                                 
 # Pipline ready to use, iter over it to use.
 # Custom loop example.
@@ -97,7 +97,7 @@ config = {
 }                                                                               
 config = Bunch(config)                                                          
 pipeline = Funnel(data_path="testdata", config=config, datatype="categorical", training=False)  
-pipeline = pipeline.dataset(type="val")                                       
+pipeline = pipeline.from_dataset(type="val")                                       
 
 # use pipeline to validate your data on model.
 loss = []
@@ -130,7 +130,7 @@ config = {
     "categorical_encoding": "labelencoder",
 }
 pipeline = Funnel(data_path="testdata", config=config, datatype="categorical")
-pipeline = pipeline.dataset(type="train")
+pipeline = pipeline.from_dataset(type="train")
 
 # Create Keras model
 model = tf.keras.applications.VGG16(

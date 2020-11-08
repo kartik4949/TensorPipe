@@ -51,9 +51,7 @@ class AugmentTest(tf.test.TestCase):
         images = tf.random.uniform(
             shape=(512, 512, 3), minval=0, maxval=255, dtype=tf.float32
         )
-        bboxes = tf.random.uniform(
-            shape=(2, 4), minval=1, maxval=511, dtype=tf.int32
-        )
+        bboxes = tf.random.uniform(shape=(2, 4), minval=1, maxval=511, dtype=tf.int32)
 
         _, bbox = self.augmentor(images, bboxes)
         self.assertEqual(bboxes.shape[0], bbox.shape[0])
@@ -62,9 +60,7 @@ class AugmentTest(tf.test.TestCase):
         images = tf.random.uniform(
             shape=(512, 512, 3), minval=0, maxval=255, dtype=tf.float32
         )
-        bboxes = tf.random.uniform(
-            shape=(2, 4), minval=1, maxval=511, dtype=tf.int32
-        )
+        bboxes = tf.random.uniform(shape=(2, 4), minval=1, maxval=511, dtype=tf.int32)
         image, bbox = self.augmentor(images, bboxes)
         self.assertEqual(image.shape[1], images.shape[1])
 
@@ -92,7 +88,7 @@ class ConfigTest(tf.test.TestCase):
         funnel = Funnel(
             data_path="testdata", config=self.config, datatype="categorical"
         )
-        _ = funnel.dataset(type="train")
+        _ = funnel.from_dataset(type="train")
         self.assertEqual(self.config.batch_size, 1)
 
     def test_config_setter(self):

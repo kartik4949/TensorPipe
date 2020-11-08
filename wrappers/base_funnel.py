@@ -33,8 +33,8 @@ ALLOWED_TYPES = ["categorical", "binary", "bbox"]
 
 class Funnel(ABC):
     """Funnel.
-            Abstract Funnel Class which acts as intterface for three supported
-            Class of dataset, and provides helper functions.
+    Abstract Funnel Class which acts as intterface for three supported
+    Class of dataset, and provides helper functions.
     """
 
     AUTOTUNE = tf.data.experimental.AUTOTUNE
@@ -83,23 +83,21 @@ class Funnel(ABC):
     @abstractmethod
     def parser(self):
         """parser.
-                Parser Abstract method which will act as abstract method for
-                Base classes.
+        Parser Abstract method which will act as abstract method for
+        Base classes.
         """
         raise NotImplementedError(
-            "Method parser is not implemented in class "
-            + self.__class__.__name__
+            "Method parser is not implemented in class " + self.__class__.__name__
         )
 
     @abstractmethod
     def encoder(self):
         """encoder.
-                Encoder Abstract which is abstractmethod, Encoder encodes
-                output in required format i.e fixed data size in bbox,segmentation.
+        Encoder Abstract which is abstractmethod, Encoder encodes
+        output in required format i.e fixed data size in bbox,segmentation.
         """
         raise NotImplementedError(
-            "Method encoder is not implemented in class "
-            + self.__class__.__name__
+            "Method encoder is not implemented in class " + self.__class__.__name__
         )
 
     def _fetch_records(filename):
@@ -135,13 +133,34 @@ class Funnel(ABC):
         return ds.prefetch(tf.data.experimental.AUTOTUNE)
 
     @abstractmethod
-    def dataset(self):
-        """dataset.
-                abstractmethod for dataset, returns iterable which can be used
-                for feed inputs to neural network.
-                provides high performing, low latency data iterable.
+    def from_dataset(self):
+        """from_dataset.
+        abstractmethod for dataset, returns iterable which can be used
+        for feed inputs to neural network.
+        provides high performing, low latency data iterable.
         """
         raise NotImplementedError(
-            "Method dataset is not implemented in class "
-            + self.__class__.__name__
+            "Method dataset is not implemented in class " + self.__class__.__name__
+        )
+
+    @abstractmethod
+    def from_tfrecords(self):
+        """from_tfrecords.
+        abstractmethod for fetch tfrecords, returns iterable which can be used
+        for feed inputs to neural network.
+        provides high performing, low latency data iterable.
+        """
+        raise NotImplementedError(
+            "Method dataset is not implemented in class " + self.__class__.__name__
+        )
+
+    @abstractmethod
+    def from_remote(self):
+        """from_remote.
+        abstractmethod for fetch remote files, returns iterable which can be used
+        for feed inputs to neural network.
+        provides high performing, low latency data iterable.
+        """
+        raise NotImplementedError(
+            "Method dataset is not implemented in class " + self.__class__.__name__
         )

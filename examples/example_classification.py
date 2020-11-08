@@ -39,7 +39,7 @@ config = {
     "numpy_function": numpy_function,
 }
 funnel = Funnel(data_path="testdata", config=config, datatype="categorical")
-dataset = funnel.dataset(type="train")
+dataset = funnel.from_dataset(type="train")
 
 for data in dataset:
     print(data[0].shape)

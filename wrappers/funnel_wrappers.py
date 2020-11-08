@@ -41,9 +41,9 @@ __all__ = ["BboxFunnel", "CategoricalTensorFunnel"]
 @FUNNEL.register_module(name="bbox")
 class BboxFunnel(Funnel):
     """BboxFunnel.
-            BboxFunnel Class for Bbox dataset,This class will provide
-            data iterable with images,bboxs or images,targets with required
-            augmentations.
+    BboxFunnel Class for Bbox dataset,This class will provide
+    data iterable with images,bboxs or images,targets with required
+    augmentations.
     """
 
     # TODO: (HIGH) Make it working for bboxs.
@@ -75,8 +75,7 @@ class BboxFunnel(Funnel):
         self._tensorrecords_path = self.data_path + "/records/"
 
     def parser(self):
-        """parser for reading images and bbox from tensor records.
-        """
+        """parser for reading images and bbox from tensor records."""
         dataset = tf.data.Dataset.list_files(
             self.tf_path_pattern, shuffle=self._training
         )
@@ -95,8 +94,8 @@ class BboxFunnel(Funnel):
 
     def dataset(self):
         """dataset.
-                Returns a iterable tf.data dataset ,which is configured
-                with the config file passed with require augmentations.
+        Returns a iterable tf.data dataset ,which is configured
+        with the config file passed with require augmentations.
         """
         rawdata = self.parser()
         decode_rawdata = lambda input: self.decoder(
@@ -117,15 +116,15 @@ class BboxFunnel(Funnel):
 class CategoricalTensorFunnel(Funnel):
     # pylint: disable=line-too-long
     """CategoricalTensorFunnel
-            TensorFunnel for Categorical Data provides DataPipeline according
-            to config passed with required augmentations.
+        TensorFunnel for Categorical Data provides DataPipeline according
+        to config passed with required augmentations.
 
-        Example: ***********************************************
-                funnel = CategoricalTensorFunnel('testdata', config=config, datatype='categorical')
-                iterable = funnel.dataset(type = 'train')
+    Example: ***********************************************
+            funnel = CategoricalTensorFunnel('testdata', config=config, datatype='categorical')
+            iterable = funnel.dataset(type = 'train')
 
-        Note: This class can only be used for categorical dataset.
-              i.e either multiclass or binary.
+    Note: This class can only be used for categorical dataset.
+          i.e either multiclass or binary.
     """
     # pylint: enable=line-too-long
 
@@ -169,9 +168,7 @@ class CategoricalTensorFunnel(Funnel):
         self.numpy_function = self.config.get("numpy_function", None)
 
         if self.numpy_function:
-            assert callable(
-                self.numpy_function
-            ), "numpy_function should be a callable."
+            assert callable(self.numpy_function), "numpy_function should be a callable."
             assert len(
                 inspect.getfullargspec(self.numpy_function).args
             ), "py_function should be having two arguments."
@@ -255,7 +252,7 @@ class CategoricalTensorFunnel(Funnel):
 
     def _get_file_labels(self, subset):
         """_get_file_labels.
-                returns files, labels which will be further used for reading images.
+        returns files, labels which will be further used for reading images.
         """
         _images = []
         _labels = []
@@ -265,13 +262,7 @@ class CategoricalTensorFunnel(Funnel):
                 self.data_path + "/" + subset + "/" + label_folder
             ):
                 _images.append(
-                    self.data_path
-                    + "/"
-                    + subset
-                    + "/"
-                    + label_folder
-                    + "/"
-                    + images
+                    self.data_path + "/" + subset + "/" + label_folder + "/" + images
                 )
                 _labels.append(label_folder)
 
@@ -280,18 +271,13 @@ class CategoricalTensorFunnel(Funnel):
         _labels = self.categorical_encoding(_labels)
         _labels = np.reshape(np.asarray(_labels), (-1, 1))
         self._size = len(_images)
-        assert len(_images) == len(
-            _labels
-        ), "Length of Images and Labels didnt match"
+        assert len(_images) == len(_labels), "Length of Images and Labels didnt match"
         return _images, _labels
 
     @typeguard.typechecked
     def parser(self, subset: str) -> tf.data:
-        """parser for reading images and bbox from tensor records.
-        """
-        dataset = tf.data.Dataset.from_tensor_slices(
-            self._get_file_labels(subset)
-        )
+        """parser for reading images and bbox from tensor records."""
+        dataset = tf.data.Dataset.from_tensor_slices(self._get_file_labels(subset))
 
         if self._training:
             dataset = dataset.shuffle(self._size)
@@ -302,8 +288,7 @@ class CategoricalTensorFunnel(Funnel):
 
     @tf.function
     def _read(self, image, label):
-        """Tensorflow Read Image helper function.
-        """
+        """Tensorflow Read Image helper function."""
         image = tf.io.read_file(image)
         image = tf.io.decode_jpeg(image, try_recover_truncated=True)
         image = tf.image.convert_image_dtype(image, dtype=tf.float32)
@@ -314,7 +299,7 @@ class CategoricalTensorFunnel(Funnel):
         return dataset
 
     @typeguard.typechecked
-    def dataset(self, type: str = "train") -> tf.data:
+    def from_dataset(self, type: str = "train") -> tf.data:
         """dataset.
                 Dataset function which provides high performance tf.data
                 iterable, which gives tuple comprising (x - image, y - labels)
@@ -340,15 +325,19 @@ class CategoricalTensorFunnel(Funnel):
             return _output[0], _output[1]
 
         if self._training:
-            dataset = dataset.map(
-                self.augmenter, num_parallel_calls=self.AUTOTUNE
-            )
+            dataset = dataset.map(self.augmenter, num_parallel_calls=self.AUTOTUNE)
             if self.numpy_function:
-                dataset = dataset.map(
-                    _numpy_function, num_parallel_calls=self.AUTOTUNE
-                )
-        dataset = dataset.batch(
-            self._batch_size, drop_remainder=self._drop_remainder
-        )
+                dataset = dataset.map(_numpy_function, num_parallel_calls=self.AUTOTUNE)
+        dataset = dataset.batch(self._batch_size, drop_remainder=self._drop_remainder)
         dataset = self.pretraining(dataset)
         return dataset
+
+    def from_tfrecords(self, tfrecord_path: str = None):
+        # TODO(kartik4949) : write me
+        # fetch tf_records
+        raise NotImplementedError
+
+    def from_remote(self, remote_path: str = None):
+        # TODO(kartik4949) : write me
+        # fetch remote files
+        raise NotImplementedError
