@@ -33,8 +33,8 @@ from register.register import AUG
 @AUG.register_module(name="gridmask")
 class GridMask(object):
     """GridMask.
-            Class which provides grid masking augmentation
-            masks a grid with fill_value on the image.
+    Class which provides grid masking augmentation
+    masks a grid with fill_value on the image.
     """
 
     def __init__(
@@ -80,8 +80,7 @@ class GridMask(object):
 
     @tf.function
     def mask(self):
-        """mask helper function for initializing grid mask of required size.
-        """
+        """mask helper function for initializing grid mask of required size."""
         mask_w = mask_h = int(
             (self.gridmask_size_ratio + 1) * max(self.h, self.w)
         )
@@ -143,10 +142,10 @@ class GridMask(object):
 @AUG.register_module(name="mosaic")
 class Mosaic:
     """Mosaic Augmentation class.
-  1. Mosaic sub images will not be preserving aspect ratio of original images.
-  2. Tested on static graphs and eager  execution.
-  3. This Implementation of mosaic augmentation is tested in tf2.x.
-  """
+    1. Mosaic sub images will not be preserving aspect ratio of original images.
+    2. Tested on static graphs and eager  execution.
+    3. This Implementation of mosaic augmentation is tested in tf2.x.
+    """
 
     def __init__(
         self,
@@ -155,14 +154,14 @@ class Mosaic:
         _minimum_mosaic_image_dim: int = 25,
     ):
         """__init__.
-    Args:
-      out_size: output mosaic image size.
-      n_images: number images to make mosaic
-      _minimum_mosaic_image_dim: minimum percentage of out_size dimension
-        should the mosaic be. i.e if out_size is (680,680) and 
-        _minimum_mosaic_image_dim is 25 , minimum mosaic sub images
-        dimension will be 25 % of 680.
-    """
+        Args:
+          out_size: output mosaic image size.
+          n_images: number images to make mosaic
+          _minimum_mosaic_image_dim: minimum percentage of out_size dimension
+            should the mosaic be. i.e if out_size is (680,680) and
+            _minimum_mosaic_image_dim is 25 , minimum mosaic sub images
+            dimension will be 25 % of 680.
+        """
         # TODO(someone) #MED #use n_images to build mosaic.
         self._n_images = n_images
         self._out_size = out_size
@@ -212,13 +211,13 @@ class Mosaic:
     @staticmethod
     def _scale_box(box, image, mosaic_image):
         """scale boxes with mosaic sub image.
-    Args:
-      box: mosaic image box.
-      image: original image.
-      mosaic_image: mosaic sub image.
-    Returns:
-      Scaled bounding boxes.
-    """
+        Args:
+          box: mosaic image box.
+          image: original image.
+          mosaic_image: mosaic sub image.
+        Returns:
+          Scaled bounding boxes.
+        """
         return [
             box[0] * tf.shape(mosaic_image)[1] / tf.shape(image)[1],
             box[1] * tf.shape(mosaic_image)[0] / tf.shape(image)[0],
@@ -228,12 +227,12 @@ class Mosaic:
 
     def _scale_images(self, images, mosaic_divide_points):
         """Scale Sub Images.
-    Args:
-      images: original single images to make mosaic.
-      mosaic_divide_points: Points to build mosaic around on given output.
-    Returns:
-      A tuple of scaled Mosaic sub images.
-    """
+        Args:
+          images: original single images to make mosaic.
+          mosaic_divide_points: Points to build mosaic around on given output.
+        Returns:
+          A tuple of scaled Mosaic sub images.
+        """
         x, y = mosaic_divide_points[0][0], mosaic_divide_points[1][0]
         mosaic_image_topleft = tf.image.resize(images[0], (x, y))
         mosaic_image_topright = tf.image.resize(
@@ -255,13 +254,13 @@ class Mosaic:
     @tf.function
     def _mosaic(self, images, boxes, mosaic_divide_points):
         """Builds mosaic of provided images.
-    Args:
-      images: original single images to make mosaic.
-      boxes: corresponding bounding boxes to images.
-      mosaic_divide_points: Points to build mosaic around on given output size.
-    Returns:
-      A tuple of mosaic Image, Mosaic Boxes merged.
-    """
+        Args:
+          images: original single images to make mosaic.
+          boxes: corresponding bounding boxes to images.
+          mosaic_divide_points: Points to build mosaic around on given output size.
+        Returns:
+          A tuple of mosaic Image, Mosaic Boxes merged.
+        """
         (
             mosaic_image_topleft,
             mosaic_image_topright,

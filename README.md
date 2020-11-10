@@ -22,9 +22,7 @@ Install using:
 pip install tensorflow-addons==0.11.2
 pip install tensorflow==2.2.0
 pip install sklearn
-
 ```
-
 
 ## Features
 
@@ -39,7 +37,7 @@ pip install sklearn
 - [x] CutOut in core tf2.x
 - [x] Flexible and easy configuration
 - [x] Gin-config support
-
+- [x] Custom numpy function injection.
 ## Advance Users Section: 
 ## Example Usage 1
 ### Create a Data Pipeline for Training.

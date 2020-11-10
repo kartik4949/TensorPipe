@@ -27,8 +27,8 @@ from functools import partial
 
 class Registry:
     """Registry.
-            Registry Class which stores module references which can be used to
-            apply pluging architecture and achieve flexiblity.
+    Registry Class which stores module references which can be used to
+    apply pluging architecture and achieve flexiblity.
     """
 
     def __init__(self, name):
@@ -41,8 +41,7 @@ class Registry:
         self._module_dict = dict()
 
     def __len__(self):
-        """__len__.
-        """
+        """__len__."""
         return len(self._module_dict)
 
     def __contains__(self, key):
@@ -54,8 +53,7 @@ class Registry:
         return self.get(key) is not None
 
     def __repr__(self):
-        """__repr__.
-        """
+        """__repr__."""
         format_str = (
             self.__class__.__name__ + f"(name={self._name}, "
             f"items={self._module_dict})"
@@ -64,14 +62,12 @@ class Registry:
 
     @property
     def name(self):
-        """name.
-        """
+        """name."""
         return self._name
 
     @property
     def module_dict(self):
-        """module_dict.
-        """
+        """module_dict."""
         return self._module_dict
 
     def get(self, key):

@@ -56,7 +56,7 @@ class _singleton(type):
 
 def singleton_pattern(cls):
     """singleton_pattern.
-            Helper singleton_pattern decorater.
+    Helper singleton_pattern decorater.
     """
     return _singleton(cls.__name__, cls.__bases__, dict(cls.__dict__))
 
@@ -67,8 +67,8 @@ def singleton_pattern(cls):
 @singleton_pattern
 class Funnel(object):
     """Funnel.
-            Funnel Class which gets the required Funnel given in
-            configuration.
+    Funnel Class which gets the required Funnel given in
+    configuration.
     """
 
     @typeguard.typechecked

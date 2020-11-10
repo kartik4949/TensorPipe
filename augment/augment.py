@@ -113,7 +113,7 @@ class Augmentation:
 
     def _set_tfa_attrb(self):
         """_set_tfa_attrb.
-                helper function which bounds attributes of tfa.image to self.
+        helper function which bounds attributes of tfa.image to self.
         """
         _ = [
             setattr(self, attrib[0], attrib[1])
@@ -233,8 +233,8 @@ class Augmentation:
 
 class Augment(Augmentation):
     """Augment.
-            Augmentation Interface which performs the augmentation in pipeline
-            in sequential manner.
+    Augmentation Interface which performs the augmentation in pipeline
+    in sequential manner.
     """
 
     @typeguard.typechecked
