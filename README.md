@@ -128,7 +128,11 @@ config = {
     "categorical_encoding": "labelencoder",
 }
 pipeline = Funnel(data_path="testdata", config=config, datatype="categorical")
+# from dataset i.e normal dataset.
 pipeline = pipeline.from_dataset(type="train")
+
+# e.g from tfrecords i.e tfrecord dataset.
+# pipeline = pipeline.from_tfrecords(type="train") # testdata/train/*.tfrecord
 
 # Create Keras model
 model = tf.keras.applications.VGG16(
@@ -178,7 +182,7 @@ Creates a mosaic of input 4 images into one single image.
 * **params**:
     * **prob** - Probablity to mosaic.
 
-## CutMix , CutOut, MixUp
+## CutMix, CutOut, MixUp
 
 ![alt text](https://www.researchgate.net/publication/340296142/figure/fig1/AS:874996595429376@1585626853032/Comparison-of-our-proposed-Attentive-CutMix-with-Mixup-5-Cutout-1-and-CutMix-3.png)
 #### source (https://www.researchgate.net/publication/340296142/figure/fig1/AS:874996595429376@1585626853032/Comparison-of-our-proposed-Attentive-CutMix-with-Mixup-5-Cutout-1-and-CutMix-3.png)
