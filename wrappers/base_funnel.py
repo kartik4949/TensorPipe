@@ -20,10 +20,10 @@ from __future__ import division
 from __future__ import print_function
 
 
-from abc import ABC, abstractmethod, abstractproperty
+import logging
+from abc import ABC, abstractmethod
 
 import tensorflow as tf
-import logging
 
 ALLOWED_TYPES = ["categorical", "binary", "bbox"]
 
@@ -43,19 +43,22 @@ class Funnel(ABC):
     def allowed_dataset_types(self):
         return ALLOWED_TYPES
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def classes(self):
-        raise NotImplementedError
+        raise NotImplementedError("Classes are not Implemented! :(")
 
     @property
     def tf_path_pattern(self):
         return self._tensorrecords_path + "*.tfrecord"
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def data_path(self):
         return self._data_path
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def datatype(self):
         return self._datatype
 
@@ -87,8 +90,7 @@ class Funnel(ABC):
         Base classes.
         """
         raise NotImplementedError(
-            "Method parser is not implemented in class "
-            + self.__class__.__name__
+            "Method parser is not implemented in class " + self.__class__.__name__
         )
 
     @abstractmethod
@@ -98,8 +100,7 @@ class Funnel(ABC):
         output in required format i.e fixed data size in bbox,segmentation.
         """
         raise NotImplementedError(
-            "Method encoder is not implemented in class "
-            + self.__class__.__name__
+            "Method encoder is not implemented in class " + self.__class__.__name__
         )
 
     def _fetch_records(filename):
@@ -142,8 +143,7 @@ class Funnel(ABC):
         provides high performing, low latency data iterable.
         """
         raise NotImplementedError(
-            "Method dataset is not implemented in class "
-            + self.__class__.__name__
+            "Method dataset is not implemented in class " + self.__class__.__name__
         )
 
     @abstractmethod
@@ -154,8 +154,7 @@ class Funnel(ABC):
         provides high performing, low latency data iterable.
         """
         raise NotImplementedError(
-            "Method dataset is not implemented in class "
-            + self.__class__.__name__
+            "Method dataset is not implemented in class " + self.__class__.__name__
         )
 
     @abstractmethod
@@ -166,6 +165,5 @@ class Funnel(ABC):
         provides high performing, low latency data iterable.
         """
         raise NotImplementedError(
-            "Method dataset is not implemented in class "
-            + self.__class__.__name__
+            "Method dataset is not implemented in class " + self.__class__.__name__
         )
