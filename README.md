@@ -7,7 +7,7 @@
 ![alt text](logo.png)
 
 
-High Performance Tensorflow Data Pipeline with State of Art Augmentations and low level optimizations.
+High Performance Tensorflow Data Pipeline with State of Art Augmentations build as a wrapper aroung tensorflow datasets api, with low level optimizations.
 
 ## Requirements
 
