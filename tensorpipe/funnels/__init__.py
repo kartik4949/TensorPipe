@@ -18,8 +18,8 @@
 from os.path import dirname, basename, isfile, join
 import glob
 
-from tensorpipe.wrappers.base_funnel import ALLOWED_TYPES
-from tensorpipe.wrappers.funnel_wrappers import *
+from .base_funnel import ALLOWED_TYPES
+from .funnels import *
 
 modules = glob.glob(join(dirname(__file__), "*.py"))
 __all__ = [

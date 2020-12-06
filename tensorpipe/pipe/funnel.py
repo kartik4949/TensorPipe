@@ -22,7 +22,7 @@ import typeguard
 
 import tensorflow as tf
 
-from .. import wrappers
+from .. import funnels
 from ..register.register import FUNNEL
 
 
@@ -100,7 +100,7 @@ class Funnel(object):
 
         """
         # pylint: enable=line-too-long
-        if datatype not in wrappers.ALLOWED_TYPES:
+        if datatype not in funnels.ALLOWED_TYPES:
             raise TypeError(
                 "datasettype not in ALLOWED_TYPEs, please check\
                              allowed dataset i.e bbox,classification labels,\
