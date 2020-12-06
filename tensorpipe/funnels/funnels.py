@@ -172,8 +172,15 @@ class BboxFunnel(Funnel, TFDecoderMixin):
         self._drop_remainder = self.config.get("drop_remainder", True)
         self.augmenter = augment.Augment(self.config, datatype)
         self.numpy_function = self.config.get("numpy_function", None)
-        self._per_shard = 10  # hardcoded shard size
+        self._per_shard = self.config.get("shard", 10)  # hardcoded shard size
         self.max_instances_per_image = self.config.get("max_instances_per_image", 100)
+        self.numpy_function = self.config.get("numpy_function", None)
+
+        if self.numpy_function:
+            assert callable(self.numpy_function), "numpy_function should be a callable."
+            assert len(
+                inspect.getfullargspec(self.numpy_function).args
+            ), "py_function should be having two arguments."
 
     @property
     def datatype(self):
@@ -225,11 +232,25 @@ class BboxFunnel(Funnel, TFDecoderMixin):
         )  # pylint: enable=g-long-lambda
         dataset = dataset.map(decode_rawdata, num_parallel_calls=self.AUTOTUNE)
         dataset = dataset.prefetch(self.config.batch_size)
-        dataset = dataset.map(
-            lambda image_id, image, bbox, classes: self.augmenter(
-                image, bbox, image_id, classes, return_image_label=False
+
+        # custom numpy function to inject in datapipeline.
+        def _numpy_function(img_id, img, bbox, classes):
+            _output = tf.numpy_function(
+                func=self.numpy_function,
+                inp=[img, bbox],
+                Tout=(tf.float32, tf.float32),
             )
-        )
+            return img_id, _output[0], _output[1], classes
+
+        if self._training:
+            dataset = dataset.map(
+                lambda image_id, image, bbox, classes: self.augmenter(
+                    image, bbox, image_id, classes, return_image_label=False
+                )
+            )
+            if self.numpy_function:
+                dataset = dataset.map(_numpy_function, num_parallel_calls=self.AUTOTUNE)
+
         # pad to fixed length.
         dataset = dataset.map(
             lambda *args: self.pad_to_fixed_len(*args),
