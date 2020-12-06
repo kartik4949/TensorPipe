@@ -65,6 +65,34 @@ class AugmentTest(tf.test.TestCase):
         self.assertEqual(image.shape[1], images.shape[1])
 
 
+class TestFunnel(tf.test.TestCase):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Create an Augmentation pipeline !
+        config = {
+            "batch_size": 1,
+            "image_size": [512, 512],
+            "transformations": {
+                "flip_left_right": None,
+                "gridmask": None,
+                "random_rotate": None,
+            },
+            "categorical_encoding": "labelencoder",
+        }
+        self.config = Bunch(config)
+        tf.compat.v1.random.set_random_seed(111111)
+
+    def test_sanity(self):
+        funnel = Funnel(
+            data_path="testdata", config=self.config, datatype="categorical"
+        )
+        dataset = funnel.from_dataset(type="train")
+        data = next(iter(dataset))
+        images = data[0]
+        self.assertEqual(self.config.image_size, images[0].shape[:2])
+
+
 class ConfigTest(tf.test.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -99,5 +127,4 @@ class ConfigTest(tf.test.TestCase):
 
 if __name__ == "__main__":
     logging.set_verbosity(logging.WARNING)
-    tf.compat.v1.disable_eager_execution()
     tf.test.main()
