@@ -15,6 +15,7 @@ High Performance Tensorflow Data Pipeline with State of Art Augmentations build 
 * Tensorflow 2.2
 * Tensorflow addons
 * Sklearn
+* typeguard
 
 Install using:
 
@@ -22,6 +23,7 @@ Install using:
 pip install tensorflow-addons==0.11.2
 pip install tensorflow==2.2.0
 pip install sklearn
+pip install typeguard
 ```
 
 ## Features
