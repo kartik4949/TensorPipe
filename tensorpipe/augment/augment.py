@@ -41,20 +41,10 @@ ALLOWED_TRANSFORMATIONS = [
 ]
 
 
-def radians(degree: int) -> float:
-    """radians.
-            helper function converts degrees to radians.
-    Args:
-        degree: degrees.
-    """
-    pi_on_180 = 0.017453292519943295
-    return degree * pi_on_180
-
-
 """Augment Class for interface of Augmentations."""
 
 
-class Augmentation:
+class Augmentation(augmentations.TransformMixin):
     """Augmentation.
     Class Augmentation which consists inhouse augmentations and builds
     the transformations pipeline with given transformations in config.
@@ -118,111 +108,6 @@ class Augmentation:
             for attrib in inspect.getmembers(tfa.image)
             if inspect.isfunction(attrib[1])
         ]
-
-    @tf.function
-    def random_rotate(
-        self, image, label, prob=0.6, range=[-25, 25], interpolation="BILINEAR"
-    ):
-        """random_rotate.
-                Randomly rotates the given image using rotation range
-                and probablity.
-
-        Args:
-            image: Image tensor.
-            label: label tensor i.e labels,bboxes,keypoints, etc.
-            prob: probablity is rotation occurs.
-            range: range of rotation in degrees.
-            interpolation: interpolation method.
-
-        Example:
-            ****************************************************
-            image , label = random_rotate(image,label,prob = 1.0)
-            visualize(image)
-        """
-        occur = tf.random.uniform([], 0, 1) < prob
-        degree = tf.random.uniform([], range[0], range[1])
-        image = tf.cond(
-            occur,
-            lambda: tfa.image.rotate(
-                image, radians(degree), interpolation=interpolation
-            ),
-            lambda: image,
-        )
-        return image, label
-
-    @tf.function
-    def random_shear_x(self, image, label, prob=0.2, range=[0, 1]):
-        """random_shear_x.
-                Randomly shears the given image using shear range
-                and probablity in x direction.
-
-        Args:
-            image: Image tensor.
-            label: label tensor i.e labels,bboxes,keypoints, etc.
-            prob: probablity if shear occurs.
-            range: range of shear (0,1).
-
-        Example:
-            ****************************************************
-            image , label = random_shear_x(image,label,prob = 1.0)
-            visualize(image)
-        """
-
-        occur = tf.random.uniform([], -0.15, 0.15) < prob
-        shearx = tf.random.uniform([], range[0], range[1])
-        image = tfa.image.shear_x(image, level=shearx, replace=0) if occur else image
-        return image, label
-
-    @tf.function
-    def random_shear_y(self, image, label, prob=0.2, range=[0, 1]):
-        """random_shear_y.
-                Randomly shears the given image using shear range
-                and probablity in y direction.
-
-        Args:
-            image: Image tensor.
-            label: label tensor i.e labels,bboxes,keypoints, etc.
-            prob: probablity of shear.
-            range: range of shear (0,1).
-
-        Example:
-            ****************************************************
-            image , label = random_shear_y(image,label,prob = 1.0)
-            visualize(image)
-        """
-
-        occur = tf.random.uniform([], 0, 1) < prob
-        sheary = tf.random.uniform([], range[0], range[1])
-        image = tfa.image.shear_y(image, level=sheary) if occur else image
-        return image, label
-
-    def gridmask(
-        self,
-        image,
-        label,
-        ratio=0.6,
-        rotate=10,
-        gridmask_size_ratio=0.5,
-        fill=1,
-    ):
-        """gridmask.
-                GridMask initializer function which intializes GridMask class.
-
-        Args:
-            image: Image tensor.
-            label: label tensor i.e labels,bboxes,keypoints, etc.
-            ratio: Ratio of grid to space.
-            rotate: rotation range for grid.
-            gridmask_size_ratio: grid to image_size ratio.
-            fill: fill value default 1.
-        """
-        return AUG.get("gridmask")(
-            self.image_size,
-            ratio=ratio,
-            rotate=rotate,
-            gridmask_size_ratio=gridmask_size_ratio,
-            fill=fill,
-        ).__call__(image, label)
 
 
 class Augment(Augmentation):
