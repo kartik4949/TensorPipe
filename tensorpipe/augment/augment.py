@@ -78,6 +78,9 @@ class Augmentation(augmentations.TransformMixin):
         self._set_tfa_attrb()
         self.image_size = config.image_size
         # builds the augment pipeline.
+        self._pipeline.append(
+            (functools.partial(tf.image.resize, size=self.image_size), False)
+        )
 
         for transform, kwargs in transformations.items():
             if transform not in ALLOWED_TRANSFORMATIONS and not hasattr(
@@ -130,7 +133,14 @@ class Augment(Augmentation):
         self.dataset_type = datatype
 
     @typeguard.typechecked
-    def __call__(self, image: tf.Tensor, label: tf.Tensor) -> (tf.Tensor, tf.Tensor):
+    def __call__(
+        self,
+        image: tf.Tensor,
+        label: tf.Tensor,
+        image_id=None,
+        classes=None,
+        return_image_label=True,
+    ) -> (tf.Tensor, tf.Tensor):
         """__call__.
                 Callable which is invoked in tfdata pipeline and performs the
                 actual transformation on images and labels.
@@ -148,4 +158,7 @@ class Augment(Augmentation):
                 image, label = transform_func(image, label)
             else:
                 image = transform_func(image)
-        return image, label
+        if return_image_label:
+            return image, label
+        else:
+            return image_id, image, label, classes

@@ -19,9 +19,9 @@ from __future__ import division
 from __future__ import print_function
 
 import os
-from bunch import Bunch
 import inspect
 import typeguard
+from bunch import Bunch
 from typing import Optional
 
 import tensorflow as tf
@@ -37,47 +37,157 @@ __all__ = ["BboxFunnel", "CategoricalTensorFunnel"]
 """Bbox Funnel for bounding box dataset."""
 
 
-# WIP
+class TFDecoderMixin:
+    """Tensorflow decoder."""
+
+    KEYS_TO_FEATURES = {
+        "image/encoded": tf.io.FixedLenFeature((), tf.string),
+        "image/source_id": tf.io.FixedLenFeature((), tf.string, ""),
+        "image/height": tf.io.FixedLenFeature((), tf.int64, -1),
+        "image/width": tf.io.FixedLenFeature((), tf.int64, -1),
+        "image/object/bbox/xmin": tf.io.VarLenFeature(tf.float32),
+        "image/object/bbox/xmax": tf.io.VarLenFeature(tf.float32),
+        "image/object/bbox/ymin": tf.io.VarLenFeature(tf.float32),
+        "image/object/bbox/ymax": tf.io.VarLenFeature(tf.float32),
+        "image/object/class/label": tf.io.VarLenFeature(tf.int64),
+        "image/object/area": tf.io.VarLenFeature(tf.float32),
+        "image/object/is_crowd": tf.io.VarLenFeature(tf.int64),
+    }
+
+    def _decode_image(self, parsed_tensors):
+        """Decodes the image"""
+        image = tf.io.decode_image(parsed_tensors["image/encoded"], channels=3)
+        image.set_shape([None, None, 3])
+        return image
+
+    def _decode_boxes(self, parsed_tensors):
+        """Concat box coordinates in the format of [ymin, xmin, ymax, xmax]."""
+        xmin = parsed_tensors["image/object/bbox/xmin"]
+        xmax = parsed_tensors["image/object/bbox/xmax"]
+        ymin = parsed_tensors["image/object/bbox/ymin"]
+        ymax = parsed_tensors["image/object/bbox/ymax"]
+        return tf.stack([ymin, xmin, ymax, xmax], axis=-1)
+
+    def decode(self, serialized_example):
+        """Decode the serialized example."""
+        parsed_tensors = tf.io.parse_single_example(
+            serialized_example, self.KEYS_TO_FEATURES
+        )
+        for k in parsed_tensors:
+            if isinstance(parsed_tensors[k], tf.SparseTensor):
+                if parsed_tensors[k].dtype == tf.string:
+                    parsed_tensors[k] = tf.sparse.to_dense(
+                        parsed_tensors[k], default_value=""
+                    )
+                else:
+                    parsed_tensors[k] = tf.sparse.to_dense(
+                        parsed_tensors[k], default_value=0
+                    )
+
+        image = self._decode_image(parsed_tensors)
+        boxes = self._decode_boxes(parsed_tensors)
+        decode_image_shape = tf.logical_or(
+            tf.equal(parsed_tensors["image/height"], -1),
+            tf.equal(parsed_tensors["image/width"], -1),
+        )
+        image_shape = tf.cast(tf.shape(image), dtype=tf.int64)
+
+        parsed_tensors["image/height"] = tf.where(
+            decode_image_shape, image_shape[0], parsed_tensors["image/height"]
+        )
+        parsed_tensors["image/width"] = tf.where(
+            decode_image_shape, image_shape[1], parsed_tensors["image/width"]
+        )
+
+        decoded_tensors = {
+            "image": image,
+            "height": parsed_tensors["image/height"],
+            "width": parsed_tensors["image/width"],
+            "groundtruth_classes": parsed_tensors["image/object/class/label"],
+            "groundtruth_boxes": boxes,
+        }
+        return decoded_tensors
+
+
 @FUNNEL.register_module(name="bbox")
-class BboxFunnel(Funnel):
+class BboxFunnel(Funnel, TFDecoderMixin):
     """BboxFunnel.
     BboxFunnel Class for Bbox dataset,This class will provide
     data iterable with images,bboxs or images,targets with required
     augmentations.
     """
 
-    # TODO: (HIGH) Make it working for bboxs.
-    def __init__(self, data_path, config=None, training=True):
+    def __init__(
+        self,
+        data_path: str,
+        config: Optional[dict] = None,
+        datatype="bbox",
+        training=True,
+    ):
         """__init__.
 
         Args:
-            data_path: Dataset Path ,this is required in prpoper structure
+            data_path: Dataset Path ,this is required in proper structure
             please see readme file for more details on structuring.
             config: Config File for setting the required configuration of datapipeline.
             training:Traning mode on or not?
+
+        Example::
+            e.g 1
+            >> funnel = Funnel(config=config, datatype = "bbox")
+            >> data = next(iter(funnel.from_tfrecords('tfrecord_data/' , type="train")))
+
+            e.g 2:
+            class CustomFunnel(BboxFunnel):
+                def __init__(self, *args):
+                    super().__init__(*args)
+
+                def encoder(self,args):
+                    # should be overriden if there is a need for anchors in the model.
+
+                    image_id, image, bbox, classes = args
+                    # make custom anchors and encode the image and bboxes as per
+                    /the model need.
+                    return image, custom_anchors, classes
+            funnel = CustomFunnel()
+
+
+
         """
-        # Not Implemented Error
-        raise NotImplementedError
         # bunch the config dict.
         config = Bunch(config)
-        super(BboxFunnel, Funnel).__init__(
-            data_path, config, datatype="bbox", training=training
-        )
         if not isinstance(data_path, str):
             msg = f"datapath should be str but pass {type(data_path)}."
             logging.error(msg)
             raise TypeError("Only str allowed")
+        if not os.path.exists(data_path):
+            msg = f"path doesnt exists"
+            logging.error(msg)
+            raise TypeError("Path doesnt exists")
 
         self._datatype = "bbox"
         self._data_path = data_path
         self.config = config
         self._training = training
-        self._tensorrecords_path = self.data_path + "/records/"
+        self._drop_remainder = self.config.get("drop_remainder", True)
+        self.augmenter = augment.Augment(self.config, datatype)
+        self.numpy_function = self.config.get("numpy_function", None)
+        self._per_shard = 10  # hardcoded shard size
+        self.max_instances_per_image = self.config.get("max_instances_per_image", 100)
 
-    def parser(self):
+    @property
+    def datatype(self):
+        return self._datatype
+
+    @property
+    def classes(self):
+        return self._classes
+
+    def parser(self, dataset_folder):
         """parser for reading images and bbox from tensor records."""
         dataset = tf.data.Dataset.list_files(
-            self.tf_path_pattern, shuffle=self._training
+            self.tf_path_pattern(os.path.join(self.data_path, dataset_folder)),
+            shuffle=self._training,
         )
         if self._training:
             dataset = dataset.repeat()
@@ -87,29 +197,72 @@ class BboxFunnel(Funnel):
 
         dataset = dataset.with_options(self.optimized_options)
         if self._training:
-            dataset = dataset.shuffle(self.per_shard)
+            dataset = dataset.shuffle(self._per_shard)
+        return dataset
 
     def encoder(self):
-        pass
+        """Method expected to be overidden by the user. """
+        raise NotImplementedError()
 
-    def dataset(self):
-        """dataset.
+    def decoder(self, value):
+        """helper decoder, a wrapper around tfrecorde decoder."""
+        data = self.decode(value)
+        image_id = 1.0
+        image = data["image"]
+        boxes = data["groundtruth_boxes"]
+        classes = data["groundtruth_classes"]
+        classes = tf.reshape(tf.cast(classes, dtype=tf.float32), [-1, 1])
+        return (image_id, image, boxes, classes)
+
+    def from_tfrecords(self, type="train"):
+        """tf_records.
         Returns a iterable tf.data dataset ,which is configured
         with the config file passed with require augmentations.
         """
-        rawdata = self.parser()
-        decode_rawdata = lambda input: self.decoder(
-            input
+        dataset = self.parser(type)
+        decode_rawdata = lambda input_records: self.decoder(
+            input_records
         )  # pylint: enable=g-long-lambda
-        dataset = rawdata.map(decode_rawdata, num_parallel_calls=self.AUTOTUNE)
+        dataset = dataset.map(decode_rawdata, num_parallel_calls=self.AUTOTUNE)
         dataset = dataset.prefetch(self.config.batch_size)
-        dataset = dataset.batch(
-            self.config.batch_size, drop_remainder=self.config.drop_remainder
+        dataset = dataset.map(
+            lambda image_id, image, bbox, classes: self.augmenter(
+                image, bbox, image_id, classes, return_image_label=False
+            )
         )
-        dataset = dataset.map(lambda *args: self.augmenter(*args))
-        dataset = dataset.map(lambda *args: self.encoder(*args))
+        # pad to fixed length.
+        dataset = dataset.map(
+            lambda *args: self.pad_to_fixed_len(*args),
+            num_parallel_calls=self.AUTOTUNE,
+        )
+        # try if encoder is implemented.
+        try:
+            self.encoder()
+        except NotImplementedError:
+            logging.info("Encoder is not implemented,giving raw output.")
+        else:
+            dataset = dataset.map(lambda *args: self.encoder(*args))
+
+        # make batches.
+        dataset = dataset.batch(
+            self.config.batch_size, drop_remainder=self._drop_remainder
+        )
         dataset = self.pretraining(dataset)
         return dataset
+
+    @property
+    def data_path(self):
+        return self._data_path
+
+    def from_dataset(self, tfrecord_path: str = None):
+        # TODO(kartik4949) : write me
+        # fetch raw data
+        raise NotImplementedError
+
+    def from_remote(self, remote_path: str = None):
+        # TODO(kartik4949) : write me
+        # fetch remote files
+        raise NotImplementedError
 
 
 @FUNNEL.register_module(name="categorical")

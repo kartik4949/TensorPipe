@@ -19,7 +19,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-
+import os
 from abc import ABC, abstractmethod, abstractproperty
 
 import tensorflow as tf
@@ -43,19 +43,21 @@ class Funnel(ABC):
     def allowed_dataset_types(self):
         return ALLOWED_TYPES
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def classes(self):
         raise NotImplementedError
 
-    @property
-    def tf_path_pattern(self):
-        return self._tensorrecords_path + "*.tfrecord"
+    def tf_path_pattern(self, path):
+        return os.path.join(path, "*.record")
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def data_path(self):
         return self._data_path
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def datatype(self):
         return self._datatype
 
@@ -87,8 +89,7 @@ class Funnel(ABC):
         Base classes.
         """
         raise NotImplementedError(
-            "Method parser is not implemented in class "
-            + self.__class__.__name__
+            "Method parser is not implemented in class " + self.__class__.__name__
         )
 
     @abstractmethod
@@ -98,11 +99,10 @@ class Funnel(ABC):
         output in required format i.e fixed data size in bbox,segmentation.
         """
         raise NotImplementedError(
-            "Method encoder is not implemented in class "
-            + self.__class__.__name__
+            "Method encoder is not implemented in class " + self.__class__.__name__
         )
 
-    def _fetch_records(filename):
+    def _fetch_records(self, filename):
         """_fetch_records.
                 Fetches record files using TfRecordDataset
 
@@ -115,6 +115,36 @@ class Funnel(ABC):
             filename:
         """
         return tf.data.TFRecordDataset(filename).prefetch(1)
+
+    @staticmethod
+    def _pad_data(data, pad_value, output_shape):
+        """helper function which pads data to given shape."""
+        max_instances_per_image = output_shape[0]
+        dimension = output_shape[1]
+        data = tf.reshape(data, [-1, dimension])
+        num_instances = tf.shape(data)[0]
+        msg = "ERROR: no. of object are more than max_instances_per_image, please increase max_instances_per_image."
+        with tf.control_dependencies(
+            [tf.assert_less(num_instances, max_instances_per_image, message=msg)]
+        ):
+            pad_length = max_instances_per_image - num_instances
+        paddings = pad_value * tf.ones([pad_length, dimension])
+        padded_data = tf.concat([data, paddings], axis=0)
+        padded_data = tf.reshape(padded_data, output_shape)
+        return padded_data
+
+    def pad_to_fixed_len(self, *args):
+        """
+        Bundle inputs into a fixed length.
+        """
+
+        image_id, image, bboxes, classes = args
+        return (
+            image_id,
+            image,
+            self._pad_data(bboxes, -1, [self.max_instances_per_image, 4]),
+            self._pad_data(classes, -1, [self.max_instances_per_image, 1]),
+        )
 
     @staticmethod
     def pretraining(ds, cache=False):
@@ -142,8 +172,7 @@ class Funnel(ABC):
         provides high performing, low latency data iterable.
         """
         raise NotImplementedError(
-            "Method dataset is not implemented in class "
-            + self.__class__.__name__
+            "Method dataset is not implemented in class " + self.__class__.__name__
         )
 
     @abstractmethod
@@ -154,8 +183,7 @@ class Funnel(ABC):
         provides high performing, low latency data iterable.
         """
         raise NotImplementedError(
-            "Method dataset is not implemented in class "
-            + self.__class__.__name__
+            "Method dataset is not implemented in class " + self.__class__.__name__
         )
 
     @abstractmethod
@@ -166,6 +194,5 @@ class Funnel(ABC):
         provides high performing, low latency data iterable.
         """
         raise NotImplementedError(
-            "Method dataset is not implemented in class "
-            + self.__class__.__name__
+            "Method dataset is not implemented in class " + self.__class__.__name__
         )

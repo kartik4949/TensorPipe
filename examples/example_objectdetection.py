@@ -23,7 +23,8 @@ Create a Funnel for the Pipeline!
 
 # Custom numpy code for injection.
 def numpy_function(image, label):
-    image = np.fliplr(image)
+    """normalize image"""
+    image = image / 255.0
     return image, label
 
 
@@ -35,11 +36,12 @@ config = {
         "gridmask": None,
         "random_rotate": None,
     },
+    "max_instances_per_image": 100,
     "categorical_encoding": "labelencoder",
     "numpy_function": numpy_function,
 }
-funnel = Funnel(data_path="testdata", config=config, datatype="categorical")
-dataset = funnel.from_dataset(type="train")
+funnel = Funnel(data_path="tfrecorddata", config=config, datatype="bbox")
+dataset = funnel.from_tfrecords(type="train")
 
 for data in dataset:
-    print(data[0].shape)
+    print(data[1].shape)

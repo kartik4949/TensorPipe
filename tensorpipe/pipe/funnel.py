@@ -31,7 +31,7 @@ from ..register.register import FUNNEL
 
 class _singleton(type):
 
-    _max_allowed_instances = 1
+    _max_allowed_instances = 2
     _instances = {}
 
     def __call__(cls, *args, **kwargs):
