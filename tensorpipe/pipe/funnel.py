@@ -22,8 +22,8 @@ import typeguard
 
 import tensorflow as tf
 
-import wrappers
-from register.register import FUNNEL
+from .. import wrappers
+from ..register.register import FUNNEL
 
 
 """Singleton Design pattern"""
@@ -48,9 +48,7 @@ class _singleton(type):
             )
 
         if cls not in cls._instances:
-            cls._instances[cls] = super(_singleton, cls).__call__(
-                *args, **kwargs
-            )
+            cls._instances[cls] = super(_singleton, cls).__call__(*args, **kwargs)
         return cls._instances[cls]
 
 
@@ -109,6 +107,4 @@ class Funnel(object):
                              segmentation."
             )
         _funnel_class = FUNNEL.get(datatype)
-        return _funnel_class(
-            data_path, config, datatype=datatype, training=training
-        )
+        return _funnel_class(data_path, config, datatype=datatype, training=training)

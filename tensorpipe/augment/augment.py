@@ -26,8 +26,8 @@ from typing import List
 import tensorflow as tf
 import tensorflow_addons as tfa
 
-from augment import augmentations
-from register.register import AUG
+from ..augment import augmentations
+from ..register.register import AUG
 
 ALLOWED_TRANSFORMATIONS = [
     "flip_left_right",
@@ -69,9 +69,7 @@ class Augmentation:
     """
 
     @typeguard.typechecked
-    def __init__(
-        self, config: dict, transformations: dict, type: str = "bbox"
-    ):
+    def __init__(self, config: dict, transformations: dict, type: str = "bbox"):
         """__init__.
                 Augmentation class provides and builds the augmentations pipe-
                 line required for tf.data iterable.
@@ -172,11 +170,7 @@ class Augmentation:
 
         occur = tf.random.uniform([], -0.15, 0.15) < prob
         shearx = tf.random.uniform([], range[0], range[1])
-        image = (
-            tfa.image.shear_x(image, level=shearx, replace=0)
-            if occur
-            else image
-        )
+        image = tfa.image.shear_x(image, level=shearx, replace=0) if occur else image
         return image, label
 
     @tf.function
@@ -251,9 +245,7 @@ class Augment(Augmentation):
         self.dataset_type = datatype
 
     @typeguard.typechecked
-    def __call__(
-        self, image: tf.Tensor, label: tf.Tensor
-    ) -> (tf.Tensor, tf.Tensor):
+    def __call__(self, image: tf.Tensor, label: tf.Tensor) -> (tf.Tensor, tf.Tensor):
         """__call__.
                 Callable which is invoked in tfdata pipeline and performs the
                 actual transformation on images and labels.

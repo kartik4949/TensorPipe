@@ -24,7 +24,7 @@ from absl import logging
 import tensorflow as tf
 import numpy as np
 
-from register.register import AUG
+from ..register.register import AUG
 
 
 """Grid Masking Augmentation Reference: https://arxiv.org/abs/2001.04086"""
@@ -81,9 +81,7 @@ class GridMask(object):
     @tf.function
     def mask(self):
         """mask helper function for initializing grid mask of required size."""
-        mask_w = mask_h = int(
-            (self.gridmask_size_ratio + 1) * max(self.h, self.w)
-        )
+        mask_w = mask_h = int((self.gridmask_size_ratio + 1) * max(self.h, self.w))
         mask = tf.zeros(shape=[mask_h, mask_w], dtype=tf.int32)
         gridblock = tf.random.uniform(
             shape=[],
@@ -117,8 +115,7 @@ class GridMask(object):
                 end = tf.math.minimum(start + length, mask_w)
                 indices = tf.reshape(tf.range(start, end), [end - start, 1])
                 updates = (
-                    tf.ones(shape=[end - start, mask_w], dtype=tf.int32)
-                    * self.fill
+                    tf.ones(shape=[end - start, mask_w], dtype=tf.int32) * self.fill
                 )
                 mask = tf.tensor_scatter_nd_update(mask, indices, updates)
             mask = tf.transpose(mask)
@@ -129,9 +126,7 @@ class GridMask(object):
         grid = self.mask()
         mask = self.__class__.random_crop(grid, image.shape)
         mask = tf.cast(mask, image.dtype)
-        mask = (
-            tf.expand_dims(mask, -1) if image._rank() != mask._rank() else mask
-        )
+        mask = tf.expand_dims(mask, -1) if image._rank() != mask._rank() else mask
         image *= mask
         return image, label
 
@@ -187,8 +182,7 @@ class Mosaic:
                 tf.int32,
             ),
             maxval=tf.cast(
-                self.out_size[0]
-                * ((100 - self._minimum_mosaic_image_dim) / 100),
+                self.out_size[0] * ((100 - self._minimum_mosaic_image_dim) / 100),
                 tf.int32,
             ),
             dtype=tf.int32,
@@ -200,8 +194,7 @@ class Mosaic:
                 tf.int32,
             ),
             maxval=tf.cast(
-                self.out_size[1]
-                * ((100 - self._minimum_mosaic_image_dim) / 100),
+                self.out_size[1] * ((100 - self._minimum_mosaic_image_dim) / 100),
                 tf.int32,
             ),
             dtype=tf.int32,
@@ -235,12 +228,8 @@ class Mosaic:
         """
         x, y = mosaic_divide_points[0][0], mosaic_divide_points[1][0]
         mosaic_image_topleft = tf.image.resize(images[0], (x, y))
-        mosaic_image_topright = tf.image.resize(
-            images[1], (self.out_size[0] - x, y)
-        )
-        mosaic_image_bottomleft = tf.image.resize(
-            images[2], (x, self.out_size[1] - y)
-        )
+        mosaic_image_topright = tf.image.resize(images[1], (self.out_size[0] - x, y))
+        mosaic_image_bottomleft = tf.image.resize(images[2], (x, self.out_size[1] - y))
         mosaic_image_bottomright = tf.image.resize(
             images[3], (self.out_size[0] - x, self.out_size[1] - y)
         )
@@ -374,12 +363,8 @@ class Mosaic:
             images, boxes, mosaic_divide_points=(x, y)
         )
 
-        upper_stack = tf.concat(
-            [mosaic_sub_images[0], mosaic_sub_images[1]], axis=0
-        )
-        lower_stack = tf.concat(
-            [mosaic_sub_images[2], mosaic_sub_images[3]], axis=0
-        )
+        upper_stack = tf.concat([mosaic_sub_images[0], mosaic_sub_images[1]], axis=0)
+        lower_stack = tf.concat([mosaic_sub_images[2], mosaic_sub_images[3]], axis=0)
         mosaic_image = tf.concat([upper_stack, lower_stack], axis=1)
         return mosaic_image, mosaic_boxes
 

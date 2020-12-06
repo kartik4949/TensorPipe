@@ -14,16 +14,15 @@
    limitations under the License.
 """
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
 
-from os.path import dirname, basename, isfile, join
-import glob
 
-from .base_funnel import ALLOWED_TYPES
-from .funnel_wrappers import *
+from ..utils.registry import Registry
 
-modules = glob.glob(join(dirname(__file__), "*.py"))
-__all__ = [
-    basename(f)[:-3]
-    for f in modules
-    if isfile(f) and not f.endswith("__init__.py")
-]
+# register for funnels
+FUNNEL = Registry("Funnels")
+
+# register for transformations
+AUG = Registry("Transformations")

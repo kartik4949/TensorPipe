@@ -29,8 +29,8 @@ import numpy as np
 import logging
 
 from .base_funnel import Funnel
-from augment import augment
-from register.register import FUNNEL
+from ..augment import augment
+from ..register.register import FUNNEL
 
 __all__ = ["BboxFunnel", "CategoricalTensorFunnel"]
 
@@ -168,9 +168,7 @@ class CategoricalTensorFunnel(Funnel):
         self.numpy_function = self.config.get("numpy_function", None)
 
         if self.numpy_function:
-            assert callable(
-                self.numpy_function
-            ), "numpy_function should be a callable."
+            assert callable(self.numpy_function), "numpy_function should be a callable."
             assert len(
                 inspect.getfullargspec(self.numpy_function).args
             ), "py_function should be having two arguments."
@@ -264,13 +262,7 @@ class CategoricalTensorFunnel(Funnel):
                 self.data_path + "/" + subset + "/" + label_folder
             ):
                 _images.append(
-                    self.data_path
-                    + "/"
-                    + subset
-                    + "/"
-                    + label_folder
-                    + "/"
-                    + images
+                    self.data_path + "/" + subset + "/" + label_folder + "/" + images
                 )
                 _labels.append(label_folder)
 
@@ -279,17 +271,13 @@ class CategoricalTensorFunnel(Funnel):
         _labels = self.categorical_encoding(_labels)
         _labels = np.reshape(np.asarray(_labels), (-1, 1))
         self._size = len(_images)
-        assert len(_images) == len(
-            _labels
-        ), "Length of Images and Labels didnt match"
+        assert len(_images) == len(_labels), "Length of Images and Labels didnt match"
         return _images, _labels
 
     @typeguard.typechecked
     def parser(self, subset: str) -> tf.data:
         """parser for reading images and bbox from tensor records."""
-        dataset = tf.data.Dataset.from_tensor_slices(
-            self._get_file_labels(subset)
-        )
+        dataset = tf.data.Dataset.from_tensor_slices(self._get_file_labels(subset))
 
         if self._training:
             dataset = dataset.shuffle(self._size)
@@ -337,16 +325,10 @@ class CategoricalTensorFunnel(Funnel):
             return _output[0], _output[1]
 
         if self._training:
-            dataset = dataset.map(
-                self.augmenter, num_parallel_calls=self.AUTOTUNE
-            )
+            dataset = dataset.map(self.augmenter, num_parallel_calls=self.AUTOTUNE)
             if self.numpy_function:
-                dataset = dataset.map(
-                    _numpy_function, num_parallel_calls=self.AUTOTUNE
-                )
-        dataset = dataset.batch(
-            self._batch_size, drop_remainder=self._drop_remainder
-        )
+                dataset = dataset.map(_numpy_function, num_parallel_calls=self.AUTOTUNE)
+        dataset = dataset.batch(self._batch_size, drop_remainder=self._drop_remainder)
         dataset = self.pretraining(dataset)
         return dataset
 
