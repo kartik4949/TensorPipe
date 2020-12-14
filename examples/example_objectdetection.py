@@ -14,6 +14,11 @@
    limitations under the License.
 """
 
+import os
+import sys
+
+sys.path.append(os.getcwd())
+
 import numpy as np
 from tensorpipe.pipe import Funnel
 

@@ -13,8 +13,14 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 """
+import os
+import sys
 
+sys.path.append(os.getcwd())
+
+from tensorpipe.pipe import Funnel
 import numpy as np
+
 from tensorpipe.pipe import Funnel
 
 """
