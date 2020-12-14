@@ -65,66 +65,6 @@ class AugmentTest(tf.test.TestCase):
         self.assertEqual(image.shape[1], images.shape[1])
 
 
-class TestFunnel(tf.test.TestCase):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        # Create an Augmentation pipeline !
-        config = {
-            "batch_size": 1,
-            "image_size": [512, 512],
-            "transformations": {
-                "flip_left_right": None,
-                "gridmask": None,
-                "random_rotate": None,
-            },
-            "categorical_encoding": "labelencoder",
-        }
-        self.config = Bunch(config)
-        tf.compat.v1.random.set_random_seed(111111)
-
-    def test_sanity(self):
-        funnel = Funnel(
-            data_path="testdata", config=self.config, datatype="categorical"
-        )
-        dataset = funnel.from_dataset(type="train")
-        data = next(iter(dataset))
-        images = data[0]
-        self.assertEqual(self.config.image_size, images[0].shape[:2])
-
-
-class ConfigTest(tf.test.TestCase):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        config = {
-            "batch_size": 1,
-            "image_size": [512, 512],
-            "transformations": {
-                "flip_left_right": None,
-                "gridmask": None,
-                "random_rotate": None,
-            },
-            "categorical_encoding": "labelencoder",
-        }
-        config = Bunch(config)
-        self.config = config
-        tf.compat.v1.random.set_random_seed(111111)
-
-    def test_config_getter(self):
-        """Verify config."""
-        funnel = Funnel(
-            data_path="testdata", config=self.config, datatype="categorical"
-        )
-        _ = funnel.from_dataset(type="train")
-        self.assertEqual(self.config.batch_size, 1)
-
-    def test_config_setter(self):
-        """Simple test for config assignment"""
-        self.config.batch_size = 2
-        self.assertEqual(self.config.batch_size, 2)
-
-
 if __name__ == "__main__":
     logging.set_verbosity(logging.WARNING)
     tf.test.main()
