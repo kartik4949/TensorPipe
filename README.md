@@ -15,6 +15,7 @@ High Performance Tensorflow Data Pipeline with State of Art Augmentations build 
 * Tensorflow 2.2
 * Tensorflow addons
 * Sklearn
+* typeguard
 
 Install using:
 
@@ -22,6 +23,7 @@ Install using:
 pip install tensorflow-addons==0.11.2
 pip install tensorflow==2.2.0
 pip install sklearn
+pip install typeguard
 ```
 
 ## Features
@@ -29,7 +31,7 @@ pip install sklearn
 - [x] High Performance tf.data pipline
 - [x] Core tensorflow support for high performance
 - [x] Classification data support
-- [ ] Bbox data support
+- [x] Bbox data support
 - [ ] Keypoints data support
 - [ ] Segmentation data support
 - [x] GridMask in core tf2.x
@@ -40,7 +42,7 @@ pip install sklearn
 - [x] Custom numpy function injection.
 ## Advance Users Section: 
 ## Example Usage 1
-### Create a Data Pipeline for Training.
+### Create a Data Pipeline for Training. (Categorical Data).
 ```
 from pipe import Funnel                                                         
 from bunch import Bunch                                                         
@@ -75,37 +77,72 @@ for data in pipeline:
 ```
 
 ## Example Usage 2
-### Create a Data Pipeline for Validation.
+### Create a Data Pipeline for Bbounding Boxes with tf records.
 
 ```
-from pipe import Funnel                                                         
-from bunch import Bunch                                                         
-"""                                                                             
-Create a Funnel for the Pipeline!                                               
-"""                                                                             
+import numpy as np
+from tensorpipe.pipe import Funnel
+
+"""
+Create a Funnel for the Pipeline!
+"""
+
+# Custom numpy code for injection.
+def numpy_function(image, label):
+    """normalize image"""
+    image = image / 255.0
+    return image, label
 
 
-# Config for Funnel
-config = {                                                                      
-    "batch_size": 1,                                                            
-    "image_size": [512,512],                                                    
-    "transformations": {                                                                                                       
-    },                                                                          
-    "categorical_encoding":"labelencoder"                                       
-}                                                                               
-config = Bunch(config)                                                          
-pipeline = Funnel(data_path="testdata", config=config, datatype="categorical", training=False)  
-pipeline = pipeline.from_dataset(type="val")                                       
+config = {
+    "batch_size": 2,
+    "image_size": [512, 512],
+    "transformations": {
+        "flip_left_right": None,
+        "gridmask": None,
+        "random_rotate": None,
+    },
+    "max_instances_per_image": 100,
+    "categorical_encoding": "labelencoder",
+    "numpy_function": numpy_function,
+}
+funnel = Funnel(data_path="tfrecorddata", config=config, datatype="bbox")
+dataset = funnel.from_tfrecords(type="train")
 
-# use pipeline to validate your data on model.
-loss = []
-for data in pipeline:
-    image_batch , actual_label_batch = data[0], data[1]
-    # pred_label_batch = model.predict(image_batch)
-    # loss.append(calc_loss(actual_label_batch,pred_label_batch))
-    print(image_batch,label_batch)                                     
+for data in dataset:
+    print(data[1].shape)
 
 ```
+# Object Detection Usage
+### Now build your custom bounding box funnel with subclassing BboxFunnel.
+
+```
+from tensorpipe.funnels import funnels
+class CustomObjectDetectionLoader(funnels.BboxFunnel):
+      def __init__(self, *args):
+          super().__init__(*args)
+
+      def encoder(self,args):
+          # encoder is overriden to give custom anchors to the model as per the need.
+
+          image_id, image, bbox, classes = args
+          # make custom anchors and encode the image and bboxes as per the model need.
+          return image, custom_anchors, classes
+      def decoder(self, args):
+          # override decoder if using custom tf records and decode your custom tfrecord in this method
+          return decoded_data
+          
+funnel = CustomObjectDetectionLoader(data_path="tfrecorddata", config=config, datatype="bbox")
+dataset = funnel.from_tfrecords(type="train")
+```
+
+# Steps to build tfrecords and custom input loader.
+- use funnels.create_records script to build tfrecord or build your own tfrecords using your custom script.
+- if used the create_records script to build records, we dont need to overide decoder, but if using custom
+  script overriding the decoder function is mandatory.
+- If using anchors in the models, please override encoder with custom anchor script.
+
+
 ## Beginners Section.
 ## Keras Compatiblity.
 ### Very simple example to use pipeline with keras model.fit as iterable.
