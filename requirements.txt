@@ -2,3 +2,4 @@ tensorflow-addons==0.11.2
 tensorflow==2.2.0
 sklearn
 typeguard
+bunch
