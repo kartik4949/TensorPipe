@@ -2,7 +2,7 @@
 [![Library][tensorflow-shield]][tensorflow-url]
 [![MIT License][license-shield]][license-url]
 [![LinkedIn][linkedin-shield]][linkedin-url]
-
+[![codecov](https://codecov.io/gh/kartik4949/TensorPipe/branch/main/graph/badge.svg?token=RWGTCX17C1)](https://codecov.io/gh/kartik4949/TensorPipe)
 
 ![alt text](logo.png)
 
