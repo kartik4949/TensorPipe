@@ -77,7 +77,7 @@ for data in pipeline:
 ```
 
 ## Example Usage 2
-### Create a Data Pipeline for Bbounding Boxes with tf records.
+### Create a Data Pipeline for Bounding Boxes with tf records.
 
 ```
 import numpy as np
