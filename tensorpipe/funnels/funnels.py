@@ -251,11 +251,6 @@ class BboxFunnel(Funnel, TFDecoderMixin):
             if self.numpy_function:
                 dataset = dataset.map(_numpy_function, num_parallel_calls=self.AUTOTUNE)
 
-        # pad to fixed length.
-        dataset = dataset.map(
-            lambda *args: self.pad_to_fixed_len(*args),
-            num_parallel_calls=self.AUTOTUNE,
-        )
         # try if encoder is implemented.
         try:
             self.encoder()
@@ -263,6 +258,12 @@ class BboxFunnel(Funnel, TFDecoderMixin):
             logging.info("Encoder is not implemented,giving raw output.")
         else:
             dataset = dataset.map(lambda *args: self.encoder(*args))
+
+        # pad to fixed length.
+        dataset = dataset.map(
+            self.pad_to_fixed_len,
+            num_parallel_calls=self.AUTOTUNE,
+        )
 
         # make batches.
         dataset = dataset.batch(
