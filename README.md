@@ -43,7 +43,7 @@ pip install typeguard
 ## Advance Users Section: 
 ## Example Usage 1
 ### Create a Data Pipeline for Training. (Categorical Data).
-```
+```python
 from pipe import Funnel                                                         
 from bunch import Bunch                                                         
 """                                                                             
@@ -79,7 +79,7 @@ for data in pipeline:
 ## Example Usage 2
 ### Create a Data Pipeline for Bounding Boxes with tf records.
 
-```
+```python
 import numpy as np
 from tensorpipe.pipe import Funnel
 
@@ -116,7 +116,7 @@ for data in dataset:
 # Object Detection Usage
 ### Now build your custom bounding box funnel with subclassing BboxFunnel.
 
-```
+```python
 from tensorpipe.funnels import funnels
 class CustomObjectDetectionLoader(funnels.BboxFunnel):
       def __init__(self, *args):
@@ -146,7 +146,7 @@ dataset = funnel.from_tfrecords(type="train")
 ## Beginners Section.
 ## Keras Compatiblity.
 ### Very simple example to use pipeline with keras model.fit as iterable.
-```
+```python
 import tensorflow as tf
 from pipe import Funnel
 
