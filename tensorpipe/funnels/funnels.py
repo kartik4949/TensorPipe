@@ -21,16 +21,17 @@ from __future__ import print_function
 import os
 import inspect
 import typeguard
-from bunch import Bunch
 from typing import Optional
 
 import tensorflow as tf
 import numpy as np
+from dependency_injector.wiring import Provide, inject
 import logging
 
 from .base_funnel import Funnel
 from ..augment import augment
 from ..register.register import FUNNEL
+from ..containers import Container
 
 __all__ = ["BboxFunnel", "CategoricalTensorFunnel"]
 
@@ -120,9 +121,10 @@ class BboxFunnel(Funnel, TFDecoderMixin):
     def __init__(
         self,
         data_path: str,
-        config: Optional[dict] = None,
         datatype="bbox",
         training=True,
+        augmenter: augment.Augment = Provide[Container.augmenter],
+        config: dict =  Provide[Container.external_config],
     ):
         """__init__.
 
@@ -154,8 +156,6 @@ class BboxFunnel(Funnel, TFDecoderMixin):
 
 
         """
-        # bunch the config dict.
-        config = Bunch(config)
         if not isinstance(data_path, str):
             msg = f"datapath should be str but pass {type(data_path)}."
             logging.error(msg)
@@ -170,7 +170,7 @@ class BboxFunnel(Funnel, TFDecoderMixin):
         self.config = config
         self._training = training
         self._drop_remainder = self.config.get("drop_remainder", True)
-        self.augmenter = augment.Augment(self.config, datatype)
+        self.augmenter = augmenter
         self.numpy_function = self.config.get("numpy_function", None)
         self._per_shard = self.config.get("shard", 10)  # hardcoded shard size
         self.max_instances_per_image = self.config.get("max_instances_per_image", 100)
@@ -304,12 +304,14 @@ class CategoricalTensorFunnel(Funnel):
     # pylint: enable=line-too-long
 
     @typeguard.typechecked
+    @inject
     def __init__(
         self,
         data_path: str,
-        config: Optional[dict] = None,
         datatype="categorical",
         training=True,
+        augmenter: augment.Augment = Provide[Container.augmenter],
+        config: dict =  Provide[Container.external_config],
     ):
         """__init__.
 
@@ -324,8 +326,6 @@ class CategoricalTensorFunnel(Funnel):
             training: is pipeline in training mode or not?
         """
 
-        # bunch the config dict.
-        config = Bunch(config)
         if not isinstance(data_path, str):
             msg = f"datapath should be str but pass {type(data_path)}."
             logging.error(msg)
@@ -339,7 +339,7 @@ class CategoricalTensorFunnel(Funnel):
         self._batch_size = self.config.get("batch_size", 32)
         self._image_size = self.config.get("image_size", [512, 512])
         self._drop_remainder = self.config.get("drop_remainder", True)
-        self.augmenter = augment.Augment(self.config, datatype)
+        self.augmenter = augmenter
         self.numpy_function = self.config.get("numpy_function", None)
 
         if self.numpy_function:

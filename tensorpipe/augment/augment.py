@@ -75,14 +75,17 @@ class Augmentation(augmentations.TransformMixin):
         self.type = type
         self.transformations = transformations
         self._pipeline = []
-        self._set_tfa_attrb()
         self.image_size = config.image_size
         # builds the augment pipeline.
         self._pipeline.append(
             (functools.partial(tf.image.resize, size=self.image_size), False)
         )
 
-        for transform, kwargs in transformations.items():
+    def setup(self):
+        # set tfa attributes
+        self._set_tfa_attrb()
+
+        for transform, kwargs in self.transformations.items():
             if transform not in ALLOWED_TRANSFORMATIONS and not hasattr(
                 tf.image, transform
             ):
@@ -129,8 +132,9 @@ class Augment(Augmentation):
         """
         self.config = config
         self.transformations = self.config.transformations
-        super().__init__(config, self.transformations, type=datatype)
         self.dataset_type = datatype
+        super().__init__(config, self.transformations, type=datatype)
+        self.setup()
 
     @typeguard.typechecked
     def __call__(

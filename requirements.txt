@@ -3,3 +3,4 @@ tensorflow==2.2.0
 sklearn
 typeguard
 bunch
+dependency-injector

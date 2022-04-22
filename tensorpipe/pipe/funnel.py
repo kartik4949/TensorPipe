@@ -19,16 +19,17 @@ from __future__ import division
 from __future__ import print_function
 
 import typeguard
-
+import sys
 import tensorflow as tf
 
 from .. import funnels
 from ..register.register import FUNNEL
+from ..augment import augment
+from ..containers import Container
 
+container = Container()
 
 """Singleton Design pattern"""
-
-
 class _singleton(type):
 
     _max_allowed_instances = 2
@@ -106,5 +107,10 @@ class Funnel(object):
                              allowed dataset i.e bbox,classification labels,\
                              segmentation."
             )
+        container.config.external_config.from_value(config)
+        container.config.datatype.from_value(datatype)
+        container.wire(modules=["..funnels"])
         _funnel_class = FUNNEL.get(datatype)
-        return _funnel_class(data_path, config, datatype=datatype, training=training)
+
+        # dependency injected
+        return _funnel_class(data_path, datatype=datatype, training=training)
